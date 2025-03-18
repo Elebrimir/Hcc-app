@@ -2,8 +2,14 @@
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   runApp(const MyApp());
 }
 
@@ -57,15 +63,13 @@ class HomePage extends StatelessWidget {
               },
               child: const Text('Notícies'),
             ),
-            Container(
-              margin: const EdgeInsets.only(top: 30.0),
-              child: const Text(
-                'HCC App',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
+            const SizedBox(height: 40.0),
+            const Text(
+              'HCC App',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
           ],
