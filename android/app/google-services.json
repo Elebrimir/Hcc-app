@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "313522586898",
+    "project_id": "hccapp-1de7c",
+    "storage_bucket": "hccapp-1de7c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:313522586898:android:3dd557c94cf15e36479fcb",
+        "android_client_info": {
+          "package_name": "com.example.hcc_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDkJp7r10jM6J14lIUzpuHpuyUzzpHEoUw"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
