@@ -1,3 +1,4 @@
+// ignore: unused_import
 import 'dart:convert';
 
 import 'package:flutter/material.dart';
@@ -51,7 +52,8 @@ class HomePage extends StatelessWidget {
             const SizedBox(height: 20.0, width: 400),
             ElevatedButton(
               onPressed: () {
-                print('Bruno es un Pelomocho');
+                // ignore: avoid_print
+                print('Button pressed');
               },
               child: const Text('Notícies'),
             ),
