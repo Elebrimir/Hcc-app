@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
@@ -14,10 +15,23 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'HCC App',
-      theme: ThemeData(primarySwatch: Colors.red),
-      home: const HomePage(),
+    return StreamBuilder(
+      stream: FirebaseAuth.instance.authStateChanges(),
+      builder: (context, snapshot) {
+        if (snapshot.hasData) {
+          return MaterialApp(
+            title: 'HCC App',
+            theme: ThemeData(primarySwatch: Colors.red),
+            home: const HomePage(),
+          );
+        } else {
+          return MaterialApp(
+            title: 'HCC App',
+            theme: ThemeData(primarySwatch: Colors.red),
+            home: HomePage(),
+          );
+        }
+      },
     );
   }
 }
