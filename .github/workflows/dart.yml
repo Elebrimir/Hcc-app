@@ -1,0 +1,47 @@
+name: Dart
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.FLUTTER_HOME }}/.pub-cache
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Run tests with coverage
+        run: flutter test --coverage
+
+      - name: Generate coverage report
+        run: |
+          dart pub global activate coverage
+          dart pub global run coverage:format_coverage --lcov --in=coverage --out=lcov.info
+
+      - name: Upload coverage report
+        uses: codecov/codecov-action@v3
+        with:
+          files: lcov.info
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze project source
+        run: dart analyze
