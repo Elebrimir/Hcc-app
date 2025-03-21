@@ -1,15 +1,47 @@
-name: Dart
+name: Dart CI
 
 on:
   push:
     branches: ["main"]
   pull_request:
     branches: ["main"]
+    types: [opened, reopened, synchronize, closed] # Para capturar diferentes eventos del PR
 
 jobs:
-  build:
+  # Job para verificar los Pull Requests (lint y tests rápidos)
+  check_pr:
+    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
 
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.FLUTTER_HOME }}/.pub-cache
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Verify formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: Analyze project source (lint)
+        run: dart analyze
+
+      # - name: Run quick tests
+      #   run: flutter test --tags "fast" # Ejemplo: ejecuta tests etiquetados como 'fast'
+
+  # Job para ejecutar todos los tests con cobertura
+  test:
+    runs-on: ubuntu-latest
+    needs: check_pr # Este job se ejecutará después de 'check_pr' si tiene éxito
     steps:
       - uses: actions/checkout@v4
 
@@ -30,18 +62,83 @@ jobs:
       - name: Run tests with coverage
         run: flutter test --coverage
 
+      - name: Upload test results to Codecov
+        if: ${{ !cancelled() }}
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+
       - name: Generate coverage report
         run: |
           dart pub global activate coverage
           dart pub global run coverage:format_coverage --lcov --in=coverage --out=lcov.info
 
-      - name: Upload coverage report
-        uses: codecov/codecov-action@v3
+      - name: Upload coverage reports to Codecov
+        uses: codecov/codecov-action@v5
         with:
-          files: lcov.info
+          token: ${{ secrets.CODECOV_TOKEN }}
 
-      - name: Verify formatting
-        run: dart format --output=none --set-exit-if-changed .
+  # Job para construir la aplicación (ejemplo de build de Android)
+  build_app:
+    runs-on: ubuntu-latest
+    needs: test # Este job se ejecutará después de 'test' si tiene éxito
+    steps:
+      - uses: actions/checkout@v4
 
-      - name: Analyze project source
-        run: dart analyze
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.FLUTTER_HOME }}/.pub-cache
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Build the app (ejemplo de build de Android)
+        run: flutter build apk --split-per-abi
+
+      # - name: Upload build artifacts (opcional)
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: app-release.apk
+      #     path: build/app/outputs/apk/release/app-release.apk
+
+  notify_pr:
+    runs-on: ubuntu-latest
+    needs: [check_pr, test, build_app]
+    if: github.event_name == 'pull_request'
+    permissions:
+      pull-requests: write
+    steps:
+      - name: Get PR information and generate message
+        id: pr_info
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_CREATOR: ${{ github.event.pull_request.user.login }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          PR_URL: ${{ github.event.pull_request.html_url }}
+          CHECK_PR_STATUS: ${{ needs.check_pr.result }}
+          TEST_STATUS: ${{ needs.test.result }}
+          BUILD_APP_STATUS: ${{ needs.build_app.result }}
+        run: |
+          PR_NUMBER_SHORT=${PR_HEAD_SHA:0:7}
+          MESSAGE="Pull Request #$PR_NUMBER ($PR_NUMBER_SHORT) por @$PR_CREATOR "
+
+          if [[ "${{ github.event.action }}" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
+            MESSAGE+="ha sido **fusionado**! 🎉"
+          elif [[ "${{ github.event.action }}" == "closed" && "${{ github.event.pull_request.merged }}" == "false" ]]; then
+            MESSAGE+="fue **cerrado** sin fusionarse."
+          else
+            MESSAGE+="status update:\n"
+            MESSAGE+="- Format & Lint: **$CHECK_PR_STATUS**\n"
+            MESSAGE+="- Tests: **$TEST_STATUS**\n"
+            MESSAGE+="- Build: **$BUILD_APP_STATUS**\n"
+            MESSAGE+="\nView the Pull Request: $PR_URL"
+          fi
+
+          echo "full_message=$MESSAGE" >> $GITHUB_OUTPUT
