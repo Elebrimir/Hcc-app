@@ -9,7 +9,7 @@ class RegistrationPage extends StatefulWidget {
   final BuildContext homePageContext;
 
   @override
-  _RegistrationPageState createState() => _RegistrationPageState();
+  State<RegistrationPage> createState() => _RegistrationPageState();
 }
 
 class _RegistrationPageState extends State<RegistrationPage> {
@@ -26,12 +26,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
               email: _emailController.text,
               password: _passwordController.text,
             );
-        print('User ${userCredential.user!.email} registered');
+        debugPrint('User ${userCredential.user!.email} registered');
 
         final User? user = userCredential.user;
         if (user != null) {
           await user.sendEmailVerification();
-          print('Email verification sent to ${user.email}');
+          debugPrint('Email verification sent to ${user.email}');
 
           final userModel = UserModel(
             email: user.email,
@@ -52,10 +52,10 @@ class _RegistrationPageState extends State<RegistrationPage> {
               backgroundColor: Colors.green,
             ),
           );
-          Navigator.of(context).pop();
+          if (mounted) Navigator.of(context).pop();
         }
       } on FirebaseAuthException catch (e) {
-        print('Failed with error code: ${e.message}');
+        debugPrint('Failed with error code: ${e.message}');
         ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
           SnackBar(
             content: Text('Error: ${e.message}'),
@@ -63,7 +63,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ),
         );
       } catch (e) {
-        print('Error desconocido al registrar o guardar datos: $e');
+        debugPrint('Error desconocido al registrar o guardar datos: $e');
         ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
           const SnackBar(
             content: Text('Error desconocido al registrar o guardar datos'),

@@ -1,13 +1,15 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
+import 'dashboard_page.dart';
+
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.homePageContext});
 
   final BuildContext homePageContext;
 
   @override
-  _LoginPageState createState() => _LoginPageState();
+  State<LoginPage> createState() => _LoginPageState();
 }
 
 class _LoginPageState extends State<LoginPage> {
@@ -34,7 +36,7 @@ class _LoginPageState extends State<LoginPage> {
         ),
       );
     } on FirebaseAuthException catch (e) {
-      print('Failed to send password reset email: ${e.message}');
+      debugPrint('Failed to send password reset email: ${e.message}');
       ScaffoldMessenger.of(
         widget.homePageContext,
       ).showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
@@ -82,20 +84,24 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               try {
-                                UserCredential userCredential =
-                                    await FirebaseAuth.instance
-                                        .signInWithEmailAndPassword(
-                                          email: _emailController.text,
-                                          password: _passwordController.text,
-                                        );
-                                print(
+                                final userCredential = await FirebaseAuth
+                                    .instance
+                                    .signInWithEmailAndPassword(
+                                      email: _emailController.text,
+                                      password: _passwordController.text,
+                                    );
+                                debugPrint(
                                   'User ${userCredential.user!.email} logged in',
                                 );
-                                if (mounted) {
-                                  Navigator.of(context).pop();
-                                }
+                                if (mounted) Navigator.of(context).pop();
+                                Navigator.pushReplacement(
+                                  widget.homePageContext,
+                                  MaterialPageRoute(
+                                    builder: (_) => const DashboardPage(),
+                                  ),
+                                );
                               } on FirebaseAuthException catch (e) {
-                                print('Failed to log in: ${e.message}');
+                                debugPrint('Failed to log in: ${e.message}');
                                 if (mounted) {
                                   ScaffoldMessenger.of(
                                     widget.homePageContext,

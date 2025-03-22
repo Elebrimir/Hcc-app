@@ -1,5 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:hcc_app/pages/dashboard_page.dart';
 import 'registration_page.dart';
 import 'login_page.dart';
 
@@ -7,7 +8,7 @@ class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
-  _HomePageState createState() => _HomePageState();
+  State<HomePage> createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
@@ -21,6 +22,15 @@ class _HomePageState extends State<HomePage> {
         _user = user;
       });
     });
+
+    if (_user != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (context) => const DashboardPage()),
+        );
+      });
+    }
   }
 
   @override
@@ -30,7 +40,7 @@ class _HomePageState extends State<HomePage> {
         title:
             _user != null
                 ? Text(
-                  'Bienvenido ${_user!.email}',
+                  'Bienvenido ${_user?.email}',
                   style: const TextStyle(
                     color: Colors.white,
                     fontSize: 24,
