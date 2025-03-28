@@ -1,0 +1,24 @@
+# Automatically label PRs based on paths
+
+source:
+  - "lib/**"
+
+tests:
+  - "test/**"
+
+documentation:
+  - "README.md"
+  - "**/*.md"
+  - "doc/**"
+
+ui:
+  - "lib/ui/**"
+  - "lib/widgets/**"
+  - "lib/**/widget.dart"
+
+assets:
+  - "assets/**"
+
+config:
+  - "pubspec.yaml"
+  - ".github/**"
