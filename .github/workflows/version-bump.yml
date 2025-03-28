@@ -1,0 +1,101 @@
+name: Version Bump
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - "lib/**"
+  workflow_dispatch:
+    inputs:
+      bump:
+        description: "Tipo de incremento (patch, minor, major)"
+        required: true
+        default: "patch"
+        type: choice
+        options:
+          - patch
+          - minor
+          - major
+
+jobs:
+  bump-version:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Dart
+        uses: dart-lang/setup-dart@v1
+
+      - name: Determine bump type
+        id: bump-type
+        run: |
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            echo "type=${{ github.event.inputs.bump }}" >> $GITHUB_OUTPUT
+          else
+            echo "type=patch" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Read current version
+        id: current-version
+        run: |
+          VERSION=$(grep -E '^version: ' pubspec.yaml | awk '{print $2}' | cut -d'+' -f1)
+          BUILD=$(grep -E '^version: ' pubspec.yaml | awk '{print $2}' | cut -d'+' -f2)
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "build=$BUILD" >> $GITHUB_OUTPUT
+          echo "Current version: $VERSION+$BUILD"
+
+      - name: Bump version
+        id: bump-version
+        run: |
+          BUMP_TYPE="${{ steps.bump-type.outputs.type }}"
+          CURRENT_VERSION="${{ steps.current-version.outputs.version }}"
+          CURRENT_BUILD="${{ steps.current-version.outputs.build }}"
+
+          IFS='.' read -r MAJOR MINOR PATCH <<< "$CURRENT_VERSION"
+
+          # Incrementar según tipo
+          if [ "$BUMP_TYPE" == "major" ]; then
+            MAJOR=$((MAJOR+1))
+            MINOR=0
+            PATCH=0
+          elif [ "$BUMP_TYPE" == "minor" ]; then
+            MINOR=$((MINOR+1))
+            PATCH=0
+          else
+            PATCH=$((PATCH+1))
+          fi
+
+          # Incrementar build number
+          NEW_BUILD=$((CURRENT_BUILD+1))
+
+          NEW_VERSION="$MAJOR.$MINOR.$PATCH"
+          echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
+          echo "new_build=$NEW_BUILD" >> $GITHUB_OUTPUT
+          echo "Nueva versión: $NEW_VERSION+$NEW_BUILD"
+
+      - name: Update pubspec.yaml
+        run: |
+          sed -i "s/^version: .*/version: ${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}/" pubspec.yaml
+          cat pubspec.yaml | grep version
+
+      - name: Update CHANGELOG.md
+        run: |
+          DATE=$(date +%Y-%m-%d)
+          sed -i "0,/## \[No publicado\]/s//## [No publicado]\n\n## [${{ steps.bump-version.outputs.new_version }}] - ${DATE}/" CHANGELOG.md
+          cat CHANGELOG.md
+
+      - name: Commit and push changes
+        run: |
+          git config --local user.email "action@github.com"
+          git config --local user.name "GitHub Action"
+          git add pubspec.yaml CHANGELOG.md
+          git commit -m "Bump version to ${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}"
+          git push
