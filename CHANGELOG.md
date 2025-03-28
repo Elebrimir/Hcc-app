@@ -7,6 +7,8 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [0.2.0] - 2025-03-28
+
 ### Agregado
 - Sistema de CI/CD con GitHub Actions
 - Etiquetado automático de Pull Requests
