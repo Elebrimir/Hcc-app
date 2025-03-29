@@ -41,7 +41,8 @@ jobs:
   # Job para ejecutar todos los tests con cobertura
   test:
     runs-on: ubuntu-latest
-    needs: check_pr # Este job se ejecutará después de 'check_pr' si tiene éxito
+    needs: check_pr # Mantenemos la dependencia para los Pull Requests
+    if: github.event_name == 'push' || needs.check_pr.result == 'success'
     steps:
       - uses: actions/checkout@v4
 
