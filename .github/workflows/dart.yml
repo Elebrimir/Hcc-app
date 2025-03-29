@@ -10,7 +10,6 @@ on:
 jobs:
   # Job para verificar los Pull Requests (lint y tests rápidos)
   check_pr:
-    if: github.event_name == 'pull_request'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -41,8 +40,7 @@ jobs:
   # Job para ejecutar todos los tests con cobertura
   test:
     runs-on: ubuntu-latest
-    needs: check_pr # Mantenemos la dependencia para los Pull Requests
-    if: github.event_name == 'push' || needs.check_pr.result == 'success'
+    needs: check_pr
     steps:
       - uses: actions/checkout@v4
 
