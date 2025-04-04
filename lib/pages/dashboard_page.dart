@@ -1,5 +1,11 @@
+import 'dart:developer';
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:hcc_app/pages/profile_page.dart';
+import 'package:hcc_app/models/user_model.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:hcc_app/widgets/hcc_app_bar.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -11,40 +17,69 @@ class DashboardPage extends StatefulWidget {
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
   User? _user;
+  UserModel? _userModel;
 
-  static const List<Widget> _pages = [
-    Center(
-      child: Text("Inici", style: TextStyle(color: Colors.white, fontSize: 24)),
-    ),
-    Center(
-      child: Text(
-        "Calendari",
-        style: TextStyle(color: Colors.white, fontSize: 24),
-      ),
-    ),
-    Center(
-      child: Text(
-        "Perfil",
-        style: TextStyle(color: Colors.white, fontSize: 24),
-      ),
-    ),
-  ];
-
-  void _onItemTapped(int index) {
-    setState(() {
-      _selectedIndex = index;
-    });
-  }
+  late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
     _user = FirebaseAuth.instance.currentUser;
 
+    if (_user != null) {
+      _loadUserData();
+    }
+
+    _pages = [
+      const Center(
+        child: Text(
+          "Inici",
+          style: TextStyle(color: Colors.white, fontSize: 24),
+        ),
+      ),
+      const Center(
+        child: Text(
+          "Calendari",
+          style: TextStyle(color: Colors.white, fontSize: 24),
+        ),
+      ),
+      const ProfilePage(),
+    ];
+
     FirebaseAuth.instance.authStateChanges().listen((User? user) {
       setState(() {
         _user = user;
       });
+      if (_user != null) {
+        _loadUserData();
+      } else {
+        setState(() {
+          _userModel = null;
+        });
+      }
+    });
+  }
+
+  Future<void> _loadUserData() async {
+    try {
+      final DocumentSnapshot<Map<String, dynamic>> snapshot =
+          await FirebaseFirestore.instance
+              .collection('users')
+              .doc(_user?.uid)
+              .get();
+      if (snapshot.exists) {
+        setState(() {
+          _userModel = UserModel.fromFirestore(snapshot, null);
+        });
+      }
+    } catch (e) {
+      log('Error loading user data: $e', name: 'DashboardPage');
+    }
+  }
+
+  void _onItemTapped(int index) {
+    setState(() {
+      _selectedIndex = index;
     });
   }
 
@@ -88,70 +123,11 @@ class _DashboardPageState extends State<DashboardPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        toolbarHeight: 120.0,
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: Image.asset('assets/images/logo_club.png', height: 60),
-            ),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.center,
-                children: [
-                  _user != null
-                      ? Text(
-                        'Dashboard - ${_user?.email}',
-                        style: const TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      )
-                      : const Text(
-                        'Hoquei Club Cocentaina',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                  Text(
-                    fechaFormateada,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 14,
-                      fontWeight: FontWeight.normal,
-                    ),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 50.0),
-              child: Image.asset('assets/images/logo_club.png', height: 60),
-            ),
-          ],
-        ),
-        backgroundColor: Colors.red[900],
-        centerTitle: true,
-        elevation: 25.0,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.logout, color: Colors.white),
-            onPressed: () async {
-              // Cerrar sesión
-              await FirebaseAuth.instance.signOut();
-              // Redirigir al login
-              if (mounted) Navigator.of(context).pop();
-            },
-          ),
-        ],
+      appBar: HccAppBar(
+        user: _user,
+        userName: _userModel?.name,
+        isDashboard: true,
+        formattedDate: fechaFormateada,
       ),
       body: _pages[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(

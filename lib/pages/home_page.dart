@@ -1,8 +1,9 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:hcc_app/pages/dashboard_page.dart';
-import 'registration_page.dart';
-import 'login_page.dart';
+import 'package:hcc_app/pages/login_page.dart';
+import 'package:hcc_app/pages/registration_page.dart';
+import 'package:hcc_app/widgets/hcc_app_bar.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -21,52 +22,22 @@ class _HomePageState extends State<HomePage> {
       setState(() {
         _user = user;
       });
-    });
 
-    if (_user != null) {
-      WidgetsBinding.instance.addPostFrameCallback((_) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const DashboardPage()),
-        );
-      });
-    }
+      if (_user != null) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          Navigator.pushReplacement(
+            context,
+            MaterialPageRoute(builder: (context) => const DashboardPage()),
+          );
+        });
+      }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title:
-            _user != null
-                ? Text(
-                  'Bienvenido ${_user?.email}',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                )
-                : const Text(
-                  'Hoquei Club Cocentaina',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-        backgroundColor: Colors.red[900],
-        centerTitle: true,
-        elevation: 5.0,
-        actions: <Widget>[
-          IconButton(
-            icon: const Icon(Icons.exit_to_app),
-            onPressed: () {
-              FirebaseAuth.instance.signOut();
-            },
-          ),
-        ],
-      ),
+      appBar: HccAppBar(user: _user),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
