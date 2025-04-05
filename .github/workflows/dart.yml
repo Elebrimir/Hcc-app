@@ -78,7 +78,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
 
   # Job para construir la aplicación (ejemplo de build de Android)
-  build_app:
+  build_android_app:
     runs-on: ubuntu-latest
     needs: test # Este job se ejecutará después de 'test' si tiene éxito
     steps:
@@ -107,9 +107,37 @@ jobs:
       #     name: app-release.apk
       #     path: build/app/outputs/apk/release/app-release.apk
 
+  # Job para construir la aplicación (ejemplo de build de iOS)
+  build_ios_app:
+    runs-on: macos-latest
+    needs: test # Este job se ejecutará después de 'test' si tiene éxito
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.x"
+
+      - uses: actions/cache@v3
+        with:
+          path: ${{ env.FLUTTER_HOME }}/.pub-cache
+          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
+
+      - name: Install dependencies
+        run: flutter pub get
+
+      - name: Clean previous builds
+        run: flutter clean
+
+      - name: Build the app (ejemplo de build de iOS)
+        run: flutter build ios --release --no-codesign
+
   notify_pr:
     runs-on: ubuntu-latest
-    needs: [check_pr, test, build_app]
+    needs: [check_pr, test, build_android_app, build_ios_app]
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
@@ -123,10 +151,41 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           CHECK_PR_STATUS: ${{ needs.check_pr.result }}
           TEST_STATUS: ${{ needs.test.result }}
-          BUILD_APP_STATUS: ${{ needs.build_app.result }}
+          BUILD_ANDROID_APP_STATUS: ${{ needs.build_android_app.result }}
+          BUILD_IOS_APP_STATUS: ${{ needs.build_ios_app.result }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
         run: |
           PR_NUMBER_SHORT=${PR_HEAD_SHA:0:7}
           MESSAGE="Pull Request #$PR_NUMBER ($PR_NUMBER_SHORT) por @$PR_CREATOR "
+
+          # Get Codecov status from the PR
+          CODECOV_STATUS="pendiente"
+          if [ "$TEST_STATUS" == "success" ]; then
+            # Wait for Codecov to process the report
+            sleep 20
+
+            # Consultar el estado de Codecov check con manejo de errores
+            RESPONSE=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              "https://api.github.com/repos/$REPO/commits/$PR_HEAD_SHA/check-runs")
+
+            # Verificar si la respuesta contiene check-runs y procesar solo si existe
+            if echo "$RESPONSE" | jq '.check_runs' | grep -q -v "null"; then
+              CODECOV_CHECK=$(echo "$RESPONSE" | jq -r '.check_runs[] | select(.name | contains("codecov")) | .conclusion' 2>/dev/null || echo "pending")
+
+              if [[ -n "$CODECOV_CHECK" && "$CODECOV_CHECK" != "null" ]]; then
+                if [[ "$CODECOV_CHECK" == "success" ]]; then
+                  CODECOV_STATUS="success"
+                elif [[ "$CODECOV_CHECK" == "failure" ]]; then
+                  CODECOV_STATUS="failure"
+                fi
+              fi
+
+              echo "Codecov check status: $CODECOV_STATUS"
+            else
+              echo "No check-runs found in the response."
+            fi
+          fi
 
           if [[ "${{ github.event.action }}" == "closed" && "${{ github.event.pull_request.merged }}" == "true" ]]; then
             MESSAGE+="ha sido **fusionado**! 🎉"
@@ -136,10 +195,25 @@ jobs:
             MESSAGE+="status update:\n"
             MESSAGE+="- Format & Lint: **$CHECK_PR_STATUS**\n"
             MESSAGE+="- Tests: **$TEST_STATUS**\n"
-            MESSAGE+="- Build: **$BUILD_APP_STATUS**\n"
+            MESSAGE+="- Build Android: **$BUILD_ANDROID_APP_STATUS**\n"
+            MESSAGE+="- Build iOS: **$BUILD_IOS_APP_STATUS**\n"
+            MESSAGE+="- Codecov: **$CODECOV_STATUS**\n"
+
+            # Añadir enlace a la página de cobertura de Codecov si está disponible
+            if [ "$CODECOV_STATUS" != "pendiente" ]; then
+              CODECOV_URL="https://codecov.io/gh/$REPO/pull/$PR_NUMBER"
+              MESSAGE+="  [Ver reporte de cobertura]($CODECOV_URL)\n"
+            fi
+
             MESSAGE+="\nView the Pull Request: $PR_URL\n\n"
-            MESSAGE+="[](https://i.shipit.today/)"
+            # Eliminamos la línea anterior que tenía el GIF estático
+            # MESSAGE+="[](https://i.shipit.today/)"
           fi
+
+          # Escapar caracteres especiales para GitHub Actions output
+          MESSAGE="${MESSAGE//'%'/'%25'}"
+          MESSAGE="${MESSAGE//$'\n'/'%0A'}"
+          MESSAGE="${MESSAGE//$'\r'/'%0D'}"
 
           echo "full_message=$MESSAGE" >> $GITHUB_OUTPUT
 
@@ -148,7 +222,24 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const message = "${{ steps.pr_info.outputs.full_message }}";
+            // Obtener el GIF aleatorio del JSON
+            let idx = 0;
+            try {
+              const gifs_resp = await fetch('https://raw.githubusercontent.com/seantomburke/shipit.gifs/master/gifs.json');
+              const gifs = await gifs_resp.json();
+              if (gifs['gifs'].length > 1) {
+                idx = Math.floor(Math.random() * (gifs['gifs'].length - 1)) + 1;
+              }
+            } catch (error) {
+              console.error('Failed to fetch GIFs, using default GIF', error);
+              idx = 0; // Default to the first GIF if fetch fails
+            }
+            // Obtener el mensaje base y añadir el GIF
+            let message = "${{ steps.pr_info.outputs.full_message }}";
+            // Añadir el GIF aleatorio
+            message += `\n\n![shipit gif](https://i.shipit.today/${idx})`;
+
+            // Publicar el comentario
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
