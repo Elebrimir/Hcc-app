@@ -116,15 +116,40 @@ jobs:
       - name: Update CHANGELOG.md
         run: |
           DATE=$(date +%Y-%m-%d)
-          COMMIT_MSG="${{ steps.bump-type.outputs.commit_message }}"
-
-          # Crear una entrada nueva con la versión y el mensaje del commit
-          NEW_ENTRY="## [${{ steps.bump-version.outputs.new_version }}] - ${DATE}\n\n${COMMIT_MSG}\n"
-          ESCAPED_NEW_ENTRY=$(printf '%s\n' "$NEW_ENTRY" | sed 's/[&/\]/\\&/g')
-
-          # Insertar después de "## [No publicado]"
-          sed -i "0,/## \[No publicado\]/s//## [No publicado]\n\n${ESCAPED_NEW_ENTRY}/" CHANGELOG.md
+          RAW_COMMIT_MSG="${{ steps.bump-type.outputs.commit_message }}"
+          # 1. Procesar el mensaje del commit: Convertir '\n' literal en saltos de línea reales
+          #    Usamos printf '%b' que interpreta las secuencias de escape como \n, \t, etc.
+          COMMIT_MSG=$(printf '%b' "$RAW_COMMIT_MSG")
+          # 2. Preparar la línea de cabecera para la nueva entrada
+          HEADER_LINE="## [${{ steps.bump-version.outputs.new_version }}] - ${DATE}"
+          # 3. Usar awk para insertar la nueva entrada con el formato correcto
+          #    - Se pasan las variables header y msg a awk de forma segura con -v
+          #    - Busca la línea que empieza con "## [No publicado]" (escapando los corchetes)
+          #    - Cuando la encuentra (y solo la primera vez, usando el flag 'inserted'):
+          #      - Imprime la línea original "## [No publicado]"
+          #      - Imprime una línea en blanco
+          #      - Imprime la línea de cabecera nueva (HEADER_LINE)
+          #      - Imprime otra línea en blanco
+          #      - Imprime el mensaje del commit ya procesado (COMMIT_MSG)
+          #      - Pone el flag inserted=1 y salta al siguiente ciclo (next)
+          #    - Para todas las demás líneas, simplemente las imprime (print $0)
+          #    - Se redirige la salida a un archivo temporal y luego se reemplaza el original
+          awk -v header="$HEADER_LINE" -v msg="$COMMIT_MSG" '
+          BEGIN { inserted=0 }
+          /## \[No publicado\]/ && !inserted {
+            print $0;        # Imprime "## [No publicado]"
+            print "";        # Imprime línea en blanco
+            print header;    # Imprime "## [x.y.z] - YYYY-MM-DD"
+            print "";        # Imprime línea en blanco
+            print msg;       # Imprime el mensaje procesado (con saltos de línea reales)
+            inserted=1;      # Marca como insertado
+            next             # Pasa a la siguiente línea del input sin imprimirla por defecto
+          }
+          { print $0 }       # Imprime cualquier otra línea
+          ' CHANGELOG.md > CHANGELOG.md.new && mv CHANGELOG.md.new CHANGELOG.md
+          echo "--- Updated CHANGELOG.md ---"
           cat CHANGELOG.md
+          echo "----------------------------"
 
       - name: Commit and push changes
         run: |
