@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [0.2.4] - 2025-04-05
+
+Ajustar correctamente formato CHANGELOG.md
+
 ## [0.2.3] - 2025-04-05\n\nUpdate Github Actions, dart and version-bump\n
 
 ## [0.2.2] - 2025-04-05
