@@ -39,9 +39,36 @@ jobs:
         run: |
           if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
             echo "type=${{ github.event.inputs.bump }}" >> $GITHUB_OUTPUT
+            echo "Usando tipo de bump especificado manualmente: ${{ github.event.inputs.bump }}"
           else
-            echo "type=patch" >> $GITHUB_OUTPUT
+            # Obtener los archivos nuevos agregados en el último commit
+            NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep -E '^lib/' || echo "")
+
+            # Contar archivos nuevos en categorías específicas
+            NEW_MODELS_PAGES_TESTS=$(echo "$NEW_FILES" | grep -E 'lib/(models|pages|test)/' | wc -l)
+            TOTAL_NEW_FILES=$(echo "$NEW_FILES" | wc -l)
+
+            # Determinar tipo de bump
+            if [ "$TOTAL_NEW_FILES" -gt 1 ]; then
+              BUMP_TYPE="major"
+              echo "Más de 1 archivo nuevo detectado: MAJOR bump"
+            elif [ "$NEW_MODELS_PAGES_TESTS" -eq 1 ]; then
+              BUMP_TYPE="minor"
+              echo "1 archivo nuevo en models, pages o test: MINOR bump"
+            else
+              BUMP_TYPE="patch"
+              echo "Solo modificaciones detectadas: PATCH bump"
+            fi
+
+            echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+            echo "Tipo de bump determinado automáticamente: $BUMP_TYPE"
           fi
+
+          # Obtener el mensaje del último commit para el CHANGELOG
+          COMMIT_MSG=$(git log -1 --pretty=%B)
+          echo "commit_message<<EOF" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Read current version
         id: current-version
@@ -89,7 +116,14 @@ jobs:
       - name: Update CHANGELOG.md
         run: |
           DATE=$(date +%Y-%m-%d)
-          sed -i "0,/## \[No publicado\]/s//## [No publicado]\n\n## [${{ steps.bump-version.outputs.new_version }}] - ${DATE}/" CHANGELOG.md
+          COMMIT_MSG="${{ steps.bump-type.outputs.commit_message }}"
+
+          # Crear una entrada nueva con la versión y el mensaje del commit
+          NEW_ENTRY="## [${{ steps.bump-version.outputs.new_version }}] - ${DATE}\n\n${COMMIT_MSG}\n"
+          ESCAPED_NEW_ENTRY=$(printf '%s\n' "$NEW_ENTRY" | sed 's/[&/\]/\\&/g')
+
+          # Insertar después de "## [No publicado]"
+          sed -i "0,/## \[No publicado\]/s//## [No publicado]\n\n${ESCAPED_NEW_ENTRY}/" CHANGELOG.md
           cat CHANGELOG.md
 
       - name: Commit and push changes
