@@ -151,10 +151,40 @@ jobs:
           cat CHANGELOG.md
           echo "----------------------------"
 
-      - name: Commit and push changes
+      - name: Create Pull Request for Version Bump
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
+          # Definir variables útiles
+          NEW_VERSION_FULL="${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}"
+          BRANCH_NAME="bump/version-${NEW_VERSION_FULL}" # Nombre para la nueva rama
+          COMMIT_MSG="Bump version to ${NEW_VERSION_FULL}" # Mensaje de commit
+          PR_TITLE="${COMMIT_MSG}" # Título para la PR
+          # Cuerpo para la PR (usaremos el mensaje procesado del commit original)
+          RAW_COMMIT_MSG="${{ steps.bump-type.outputs.commit_message }}"
+          PR_BODY=$(printf '%b' "$RAW_COMMIT_MSG")
+          echo "Configurando Git..."
           git config --local user.email "action@github.com"
-          git config --local user.name "GitHub Action"
+          # Puedes poner un nombre más descriptivo si quieres
+          git config --local user.name "GitHub Action Bot [version bump]"
+          echo "Creando y cambiando a la nueva rama: ${BRANCH_NAME}"
+          git checkout -b ${BRANCH_NAME}
+          echo "Añadiendo y haciendo commit de los cambios..."
           git add pubspec.yaml CHANGELOG.md
-          git commit -m "Bump version to ${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}"
-          git push
+          # Verifica si hay cambios antes de hacer commit para evitar errores si no hay nada que commitear
+          if git diff --staged --quiet; then
+            echo "No hay cambios para hacer commit."
+          else
+            git commit -m "${COMMIT_MSG}"
+          fi
+          echo "Subiendo la nueva rama ${BRANCH_NAME}..."
+          # --set-upstream para enlazar la rama local con la remota la primera vez
+          git push --set-upstream origin ${BRANCH_NAME}
+          echo "Creando Pull Request..."
+          # Usamos la CLI de GitHub (gh) que está preinstalada en los runners
+          gh pr create \
+            --base main \
+            --head ${BRANCH_NAME} \
+            --title "${PR_TITLE}" \
+            --body "${PR_BODY}"
+          echo "Pull Request creada."
