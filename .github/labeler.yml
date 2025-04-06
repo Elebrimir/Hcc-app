@@ -1,24 +1,52 @@
-# Automatically label PRs based on paths
+# Archivo: .github/labeler.yml (Sintaxis v5 - CORREGIDA con any: y kebab-case)
 
 source:
-  - "lib/**"
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ['lib/**']
 
 tests:
-  - "test/**"
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ['test/**']
 
 documentation:
-  - "README.md"
-  - "**/*.md"
-  - "doc/**"
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+            - 'README.md'
+            - '**/*.md'
+            - 'doc/**'
 
 ui:
-  - "lib/ui/**"
-  - "lib/widgets/**"
-  - "lib/**/widget.dart"
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+            - 'lib/ui/**'
+            - 'lib/widgets/**'
+            - 'lib/**/widget.dart'
 
 assets:
-  - "assets/**"
+  - any:
+      - changed-files:
+          - any-glob-to-any-file: ['assets/**']
 
 config:
-  - "pubspec.yaml"
-  - ".github/**"
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+            - 'pubspec.yaml'
+            - '.github/**'
+
+github-actions:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+            - '.github/**'
+
+dependencies:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+            - 'pubspec.yaml'
+            - 'pubspec.lock'
