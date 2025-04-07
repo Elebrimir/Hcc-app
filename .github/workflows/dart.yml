@@ -77,67 +77,9 @@ jobs:
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
 
-  # Job para construir la aplicación (ejemplo de build de Android)
-  build_android_app:
-    runs-on: ubuntu-latest
-    needs: test # Este job se ejecutará después de 'test' si tiene éxito
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.x"
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.FLUTTER_HOME }}/.pub-cache
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Build the app (ejemplo de build de Android)
-        run: flutter build apk --split-per-abi
-
-      # - name: Upload build artifacts (opcional)
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: app-release.apk
-      #     path: build/app/outputs/apk/release/app-release.apk
-
-  # Job para construir la aplicación (ejemplo de build de iOS)
-  build_ios_app:
-    runs-on: macos-latest
-    needs: test # Este job se ejecutará después de 'test' si tiene éxito
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.x"
-
-      - uses: actions/cache@v4
-        with:
-          path: ${{ env.FLUTTER_HOME }}/.pub-cache
-          key: ${{ runner.os }}-flutter-${{ hashFiles('**/pubspec.lock') }}
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Clean previous builds
-        run: flutter clean
-
-      - name: Build the app (ejemplo de build de iOS)
-        run: flutter build ios --release --no-codesign
-
   notify_pr:
     runs-on: ubuntu-latest
-    needs: [check_pr, test, build_android_app, build_ios_app]
+    needs: [check_pr, test]
     if: github.event_name == 'pull_request'
     permissions:
       pull-requests: write
@@ -151,8 +93,6 @@ jobs:
           PR_URL: ${{ github.event.pull_request.html_url }}
           CHECK_PR_STATUS: ${{ needs.check_pr.result }}
           TEST_STATUS: ${{ needs.test.result }}
-          BUILD_ANDROID_APP_STATUS: ${{ needs.build_android_app.result }}
-          BUILD_IOS_APP_STATUS: ${{ needs.build_ios_app.result }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
         run: |
@@ -195,8 +135,6 @@ jobs:
             MESSAGE+="status update:\n"
             MESSAGE+="- Format & Lint: **$CHECK_PR_STATUS**\n"
             MESSAGE+="- Tests: **$TEST_STATUS**\n"
-            MESSAGE+="- Build Android: **$BUILD_ANDROID_APP_STATUS**\n"
-            MESSAGE+="- Build iOS: **$BUILD_IOS_APP_STATUS**\n"
             MESSAGE+="- Codecov: **$CODECOV_STATUS**\n"
 
             # Añadir enlace a la página de cobertura de Codecov si está disponible
