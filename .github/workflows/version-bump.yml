@@ -6,6 +6,8 @@ on:
       - main
     paths:
       - "lib/**"
+      - "test/**"
+      - "widgets/**"
   workflow_dispatch:
     inputs:
       bump:
@@ -45,7 +47,7 @@ jobs:
             NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep -E '^lib/' || echo "")
 
             # Contar archivos nuevos en categorías específicas
-            NEW_MODELS_PAGES_TESTS=$(echo "$NEW_FILES" | grep -E 'lib/(models|pages|test)/' | wc -l)
+            NEW_MODELS_PAGES_TESTS=$(echo "$NEW_FILES" | grep -E 'lib/(models|pages|widgets)/' | wc -l)
             TOTAL_NEW_FILES=$(echo "$NEW_FILES" | wc -l)
 
             # Determinar tipo de bump
@@ -54,10 +56,10 @@ jobs:
               echo "Más de 1 archivo nuevo detectado: MAJOR bump"
             elif [ "$NEW_MODELS_PAGES_TESTS" -eq 1 ]; then
               BUMP_TYPE="minor"
-              echo "1 archivo nuevo en models, pages o test: MINOR bump"
+              echo "1 archivo nuevo en models, pages, widgets: MINOR bump"
             else
               BUMP_TYPE="patch"
-              echo "Solo modificaciones detectadas: PATCH bump"
+              echo "Solo modificaciones detectadas o tests añadidos: PATCH bump"
             fi
 
             echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
