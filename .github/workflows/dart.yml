@@ -98,14 +98,28 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build the app (ejemplo de build de Android)
-        run: flutter build apk --split-per-abi
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.ANDROID_KEYSTORE_BASE64 }}" | base64 --decode > android/app/upload-keystore.jks
 
-      # - name: Upload build artifacts (opcional)
-      #   uses: actions/upload-artifact@v3
-      #   with:
-      #     name: app-release.apk
-      #     path: build/app/outputs/apk/release/app-release.apk
+      - name: Create key.properties
+        run: |
+          echo "storeFile=upload-keystore.jks" > android/key.properties
+          echo "storePassword=${{ secrets.ANDROID_KEYSTORE_PASSWORD }}" >> android/key.properties
+          echo "keyAlias=${{ secrets.ANDROID_KEY_ALIAS }}" >> android/key.properties
+          echo "keyPassword=${{ secrets.ANDROID_KEY_PASSWORD }}" >> android/key.properties
+
+      - name: Build Android app Bundle
+        run: flutter build appbundle
+
+      - name: Upload Android App Bundle Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: hcc_app-release.aab
+          path: build/app/outputs/bundle/release/hcc_app-release.aab
+
+      - name: Notify on successful build
+        run: echo "Android App Bundle uploaded successfully."
 
   # Job para construir la aplicación (ejemplo de build de iOS)
   build_ios_app:
@@ -195,8 +209,8 @@ jobs:
             MESSAGE+="status update:\n"
             MESSAGE+="- Format & Lint: **$CHECK_PR_STATUS**\n"
             MESSAGE+="- Tests: **$TEST_STATUS**\n"
-            MESSAGE+="- Build Android: **$BUILD_ANDROID_APP_STATUS**\n"
-            MESSAGE+="- Build iOS: **$BUILD_IOS_APP_STATUS**\n"
+            # MESSAGE+="- Build Android: **$BUILD_ANDROID_APP_STATUS**\n"
+            # MESSAGE+="- Build iOS: **$BUILD_IOS_APP_STATUS**\n"
             MESSAGE+="- Codecov: **$CODECOV_STATUS**\n"
 
             # Añadir enlace a la página de cobertura de Codecov si está disponible
