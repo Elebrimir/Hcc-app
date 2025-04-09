@@ -7,6 +7,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [0.2.6] - 2025-04-09
+
+Add profile test and update profile page widget
+
 ## [0.2.5] - 2025-04-07
 
 Add FUNDING.yml for supported funding platforms and enhance version bump workflow with PR creation
