@@ -2,32 +2,28 @@ import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hcc_app/models/user_model.dart';
-// Imports para imagen (descomentar cuando actives Storage)
-// import 'dart:io';
-// import 'package/image_picker/image_picker.dart';
-// import 'package:firebase_storage/firebase_storage.dart';
 
 class ProfilePage extends StatefulWidget {
-  const ProfilePage({super.key});
+  final FirebaseAuth? auth;
+  final FirebaseFirestore? firestore;
+
+  const ProfilePage({super.key, this.auth, this.firestore});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
 }
 
 class _ProfilePageState extends State<ProfilePage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth get _auth => widget.auth ?? FirebaseAuth.instance;
+  FirebaseFirestore get _firestore =>
+      widget.firestore ?? FirebaseFirestore.instance;
 
   UserModel? _userModel;
   bool _isLoading = true;
   String? _errorMessage;
 
-  // Controladores para los campos editables
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _lastnameController = TextEditingController();
-  // Variable para almacenar la imagen seleccionada (descomentar cuando actives Storage)
-  // File? _selectedImageFile;
-  // bool _isUploading = false;
 
   @override
   void initState() {
@@ -71,7 +67,6 @@ class _ProfilePageState extends State<ProfilePage> {
           _userModel = UserModel.fromFirestore(snapshot, null);
           _nameController.text = _userModel?.name ?? '';
           _lastnameController.text = _userModel?.lastname ?? '';
-          // _imageUrlFromFirestore = _userModel?.image ?? '';
         });
       } else {
         setState(() {
@@ -100,16 +95,13 @@ class _ProfilePageState extends State<ProfilePage> {
       return;
     }
 
-    setState(() {
-      // _isUploading = true;
-    });
+    setState(() {});
 
     const String usersCollection = 'users';
 
     Map<String, dynamic> dataToUpdate = {
       'name': _nameController.text.trim(),
       'lastname': _lastnameController.text.trim(),
-      // 'image': _imageUrlFromFirestore, // Descomentar cuando actives Storage
     };
 
     try {
@@ -127,9 +119,7 @@ class _ProfilePageState extends State<ProfilePage> {
         SnackBar(content: Text('Error al actualitzar el perfil: $e')),
       );
     } finally {
-      setState(() {
-        // _isUploading = false;
-      });
+      setState(() {});
     }
   }
 
@@ -137,14 +127,6 @@ class _ProfilePageState extends State<ProfilePage> {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Image picker no implementat.')),
     );
-    // Descomentar cuando actives Storage
-    // final ImagePicker picker = ImagePicker();
-    // final XFile? image = await picker.pickImage(source: ImageSource.gallery);
-    // if (image != null) {
-    //     setState(() {
-    //         _selectedImageFile = File(image.path);
-    //     });
-    // }
   }
 
   @override
