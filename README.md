@@ -1,3 +1,19 @@
+<!-- START doctoc generated TOC please keep comment here to allow auto update -->
+<!-- DON'T EDIT THIS SECTION, INSTEAD RE-RUN doctoc TO UPDATE -->
+**Table of Contents**  *generated with [DocToc](https://github.com/thlorenz/doctoc)*
+
+- [🏑 HCC App - Hoquei Club Cocentaina](#-hcc-app---hoquei-club-cocentaina)
+  - [📱 Descripción](#-descripci%C3%B3n)
+  - [✨ Características](#-caracter%C3%ADsticas)
+  - [🛠️ Tecnologías](#-tecnolog%C3%ADas)
+  - [🚀 Instalación](#-instalaci%C3%B3n)
+  - [📁 Estructura del Proyecto](#-estructura-del-proyecto)
+  - [🤝 Contribución](#-contribuci%C3%B3n)
+  - [📄 Licencia](#-licencia)
+  - [📬 Contacto](#-contacto)
+
+<!-- END doctoc generated TOC please keep comment here to allow auto update -->
+
 # 🏑 HCC App - Hoquei Club Cocentaina
 
 ![Logo](assets/images/logo_club.png)
