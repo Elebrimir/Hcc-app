@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
-import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_auth/firebase_auth.dart' as auth;
 import 'package:mockito/mockito.dart';
 
-class MockUser extends Mock implements User {
+class MockUser extends Mock implements auth.User {
   @override
   final String? email;
 
   MockUser({this.email});
 }
 
-// Widget de prueba para envolver nuestro HccAppBar
+class MockFirebaseAuth extends Mock implements auth.FirebaseAuth {}
+
+class MockNavigatorObserver extends Mock implements NavigatorObserver {}
+
 class TestScaffold extends StatelessWidget {
   final HccAppBar appBar;
 
@@ -31,64 +34,48 @@ class TestScaffold extends StatelessWidget {
 void main() {
   group('HccAppBar Widget Tests', () {
     testWidgets('should render regular AppBar when isDashboard is false', (
-      WidgetTester tester,
+      tester,
     ) async {
-      // Build our app and trigger a frame.
       await tester.pumpWidget(
-        TestScaffold(appBar: HccAppBar(isDashboard: false, user: null)),
+        TestScaffold(appBar: HccAppBar(user: null, isDashboard: false)),
       );
 
-      // Verify that the title is shown correctly
       expect(find.text('Hoquei Club Cocentaina'), findsOneWidget);
-
-      // Verify that the logout button is not shown when no user is provided
       expect(find.byIcon(Icons.exit_to_app), findsNothing);
     });
 
     testWidgets('should render dashboard AppBar when isDashboard is true', (
-      WidgetTester tester,
+      tester,
     ) async {
-      // Build our app and trigger a frame.
       await tester.pumpWidget(
         TestScaffold(
           appBar: HccAppBar(
+            user: null,
             isDashboard: true,
             formattedDate: 'Dimecres, 1 de Març de 2023',
-            user: null,
           ),
         ),
       );
 
-      // Verify that the date is shown
       expect(find.text('Dimecres, 1 de Març de 2023'), findsOneWidget);
-
-      // Verify title
       expect(find.text('Hoquei Club Cocentaina'), findsOneWidget);
-
-      // Note: Asset image won't load in test environment, but we can check if the structure is there
-      // In production code, we'll need to add error handlers for Image.asset in tests
     });
 
     testWidgets(
       'should display user email when user is provided but no userName',
-      (WidgetTester tester) async {
+      (tester) async {
         final mockUser = MockUser(email: 'test@example.com');
 
         await tester.pumpWidget(
           TestScaffold(appBar: HccAppBar(user: mockUser, isDashboard: true)),
         );
 
-        // Verify that the user email is displayed with greeting
         expect(find.text('Hola test@example.com'), findsOneWidget);
-
-        // Verify that logout button is shown
         expect(find.byIcon(Icons.logout), findsOneWidget);
       },
     );
 
-    testWidgets('should display userName when provided', (
-      WidgetTester tester,
-    ) async {
+    testWidgets('should display userName when provided', (tester) async {
       final mockUser = MockUser(email: 'test@example.com');
 
       await tester.pumpWidget(
@@ -101,12 +88,11 @@ void main() {
         ),
       );
 
-      // Verify that the user name is displayed with greeting
       expect(find.text('Hola John Doe'), findsOneWidget);
     });
 
     testWidgets('should display welcome message with email in regular mode', (
-      WidgetTester tester,
+      tester,
     ) async {
       final mockUser = MockUser(email: 'test@example.com');
 
@@ -114,23 +100,46 @@ void main() {
         TestScaffold(appBar: HccAppBar(user: mockUser, isDashboard: false)),
       );
 
-      // Verify welcome message
       expect(find.text('Bienvenido test@example.com'), findsOneWidget);
-
-      // Verify logout button
       expect(find.byIcon(Icons.exit_to_app), findsOneWidget);
     });
 
     testWidgets('should have correct preferred size based on isDashboard', (
-      WidgetTester tester,
+      tester,
     ) async {
-      // Test regular app bar height
-      final regularAppBar = HccAppBar(isDashboard: false, user: null);
+      final regularAppBar = HccAppBar(user: null, isDashboard: false);
       expect(regularAppBar.preferredSize.height, kToolbarHeight);
 
-      // Test dashboard app bar height
-      final dashboardAppBar = HccAppBar(isDashboard: true, user: null);
+      final dashboardAppBar = HccAppBar(user: null, isDashboard: true);
       expect(dashboardAppBar.preferredSize.height, 120.0);
+    });
+
+    testWidgets('should call onNavigate when _onSignOut is called', (
+      tester,
+    ) async {
+      final mockUser = MockUser(email: 'test@example.com');
+      bool navigateCalled = false;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: TestScaffold(
+            appBar: HccAppBar(
+              user: mockUser,
+              isDashboard: false,
+              onNavigate: (_) {
+                navigateCalled = true; // Marca como llamada
+              },
+            ),
+          ),
+        ),
+      );
+
+      // Simula el tap en el botón de logout
+      await tester.tap(find.byIcon(Icons.exit_to_app));
+      await tester.pumpAndSettle();
+
+      // Verifica que la función de navegación fue llamada
+      expect(navigateCalled, true);
     });
   });
 }

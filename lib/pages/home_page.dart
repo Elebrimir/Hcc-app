@@ -37,7 +37,12 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: HccAppBar(user: _user),
+      appBar: HccAppBar(
+        user: _user,
+        userName: _user != null ? _user!.email : 'Invitado',
+        formattedDate: DateTime.now().toString(),
+        isDashboard: false,
+      ),
       body: SingleChildScrollView(
         child: Center(
           child: Column(
