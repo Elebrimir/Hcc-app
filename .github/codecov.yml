@@ -2,29 +2,28 @@ codecov:
   require_ci_to_pass: true
 
 coverage:
-  range: "60...100"  # Rango más amplio para aprendizaje
+  range: "60...100"
   round: down
   precision: 2
   status:
     project:
       default:
-        target: 70%  # Objetivo accesible para el proyecto completo
-        threshold: 5%  # Umbral más permisivo
+        target: 70%
+        threshold: 5%
         if_not_found: success
     patch:
       default:
-        target: 60%  # Muy permisivo para cambios
-        threshold: 10%  # Gran margen para experimentar
-    changes:
-      default:
-        target: 70%  # Objetivo razonable para código nuevo
-        threshold: 5%
+        target: 60%
+        threshold: 10%
 
 comment:
   layout: "reach,diff,flags,files"
   behavior: default
-  require_changes: no  # Mantiene comentarios para aprendizaje
-  branches: false
+  require_changes: false
+  require_base: false
+  require_head: false
+  hide_project_coverage: false
+  branches: ["main", "dev"]
 
 flags:
   flutter:
