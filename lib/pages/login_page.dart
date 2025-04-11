@@ -1,3 +1,7 @@
+// Copyright (c) 2025 HCC. All rights reserved.
+// Use of this source code is governed by an MIT-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hcc_app/pages/dashboard_page.dart';
