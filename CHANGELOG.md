@@ -26,6 +26,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [0.2.7] - 2025-04-11
+
+Actualizar etiquetas de navegación en DashboardPage y refactorizar ProfilePage para inicializar FirebaseAuth y FirebaseFirestore. Agregar pruebas para DashboardPage.
+
 ## [0.2.6] - 2025-04-09
 
 Add profile test and update profile page widget
