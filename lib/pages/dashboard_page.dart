@@ -64,10 +64,10 @@ class _DashboardPageState extends State<DashboardPage> {
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inici'),
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
-            label: 'Calendari',
+            label: 'Agenda',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
