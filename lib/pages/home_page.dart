@@ -4,6 +4,8 @@ import 'package:hcc_app/pages/dashboard_page.dart';
 import 'package:hcc_app/pages/login_page.dart';
 import 'package:hcc_app/pages/registration_page.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -36,10 +38,13 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+
     return Scaffold(
       appBar: HccAppBar(
-        user: _user,
-        userName: _user != null ? _user!.email : 'Invitado',
+        user: userProvider.firebaseUser,
+        userName:
+            null, // Deja que el HccAppBar cargue el nombre desde Firestore
         formattedDate: DateTime.now().toString(),
         isDashboard: false,
       ),
