@@ -1,11 +1,12 @@
-import 'dart:developer';
+// Copyright (c) 2025 HCC. All rights reserved.
+// Use of this source code is governed by an MIT-style license that can be
+// found in the LICENSE file.
 
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:hcc_app/pages/profile_page.dart';
-import 'package:hcc_app/models/user_model.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
+import 'package:provider/provider.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -16,19 +17,12 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
-  User? _user;
-  UserModel? _userModel;
 
   late final List<Widget> _pages;
 
   @override
   void initState() {
     super.initState();
-    _user = FirebaseAuth.instance.currentUser;
-
-    if (_user != null) {
-      _loadUserData();
-    }
 
     _pages = [
       const Center(
@@ -45,36 +39,6 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       const ProfilePage(),
     ];
-
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      setState(() {
-        _user = user;
-      });
-      if (_user != null) {
-        _loadUserData();
-      } else {
-        setState(() {
-          _userModel = null;
-        });
-      }
-    });
-  }
-
-  Future<void> _loadUserData() async {
-    try {
-      final DocumentSnapshot<Map<String, dynamic>> snapshot =
-          await FirebaseFirestore.instance
-              .collection('users')
-              .doc(_user?.uid)
-              .get();
-      if (snapshot.exists) {
-        setState(() {
-          _userModel = UserModel.fromFirestore(snapshot, null);
-        });
-      }
-    } catch (e) {
-      log('Error loading user data: $e', name: 'DashboardPage');
-    }
   }
 
   void _onItemTapped(int index) {
@@ -85,6 +49,34 @@ class _DashboardPageState extends State<DashboardPage> {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final userModel = userProvider.userModel;
+
+    return Scaffold(
+      appBar: HccAppBar(
+        user: userProvider.firebaseUser,
+        userName: userModel?.name,
+        isDashboard: true,
+        formattedDate: _getFormattedDate(),
+      ),
+      body: _pages[_selectedIndex],
+      bottomNavigationBar: BottomNavigationBar(
+        currentIndex: _selectedIndex,
+        onTap: _onItemTapped,
+        items: const [
+          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inici'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.calendar_today),
+            label: 'Calendari',
+          ),
+          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+        ],
+      ),
+      backgroundColor: Colors.grey[800],
+    );
+  }
+
+  String _getFormattedDate() {
     final now = DateTime.now();
     final meses = [
       'Gener',
@@ -110,39 +102,12 @@ class _DashboardPageState extends State<DashboardPage> {
       'Diumenge',
     ];
 
-    String fechaFormateada;
-
     if (meses[now.month - 1] == 'Abril' ||
         meses[now.month - 1] == 'Agost' ||
         meses[now.month - 1] == 'Octubre') {
-      fechaFormateada =
-          '${dias[now.weekday - 1]}, ${now.day} d\'${meses[now.month - 1]} de ${now.year}';
+      return '${dias[now.weekday - 1]}, ${now.day} d\'${meses[now.month - 1]} de ${now.year}';
     } else {
-      fechaFormateada =
-          '${dias[now.weekday - 1]}, ${now.day} de ${meses[now.month - 1]} de ${now.year}';
+      return '${dias[now.weekday - 1]}, ${now.day} de ${meses[now.month - 1]} de ${now.year}';
     }
-
-    return Scaffold(
-      appBar: HccAppBar(
-        user: _user,
-        userName: _userModel?.name,
-        isDashboard: true,
-        formattedDate: fechaFormateada,
-      ),
-      body: _pages[_selectedIndex],
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Inici'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Calendari',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-        ],
-      ),
-      backgroundColor: Colors.grey[800],
-    );
   }
 }

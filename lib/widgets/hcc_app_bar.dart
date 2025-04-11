@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:hcc_app/pages/home_page.dart';
+import 'package:provider/provider.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 
 class HccAppBar extends StatefulWidget implements PreferredSizeWidget {
   final User? user;
@@ -9,8 +10,7 @@ class HccAppBar extends StatefulWidget implements PreferredSizeWidget {
   final String? formattedDate;
   final bool isDashboard;
   final VoidCallback? onSignOut;
-  final void Function(BuildContext)?
-  onNavigate; // Nueva función para navegación
+  final void Function(BuildContext)? onNavigate;
 
   const HccAppBar({
     super.key,
@@ -20,7 +20,7 @@ class HccAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.formattedDate,
     this.isDashboard = false,
     this.onSignOut,
-    this.onNavigate, // Nuevo parámetro
+    this.onNavigate,
   });
 
   @override
@@ -31,58 +31,35 @@ class HccAppBar extends StatefulWidget implements PreferredSizeWidget {
 }
 
 class _HccAppBarState extends State<HccAppBar> {
-  User? _user;
-  String? _userName;
-  String? _formattedDate;
-  bool _isDashboard = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _user = widget.user;
-    _userName = widget.userName;
-    _formattedDate = widget.formattedDate;
-    _isDashboard = widget.isDashboard;
-  }
-
-  Future<void> _onSignOut() async {
-    if (context.mounted) {
-      if (widget.onNavigate != null) {
-        widget.onNavigate!(
-          context,
-        ); // Usa la función inyectada si está disponible
-      } else {
-        await FirebaseAuth.instance.signOut();
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(builder: (context) => const HomePage()),
-        );
-      }
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final userModel = userProvider.userModel;
+    final firebaseUser = userProvider.firebaseUser;
+
     const TextStyle appBarTextStyle = TextStyle(
       color: Colors.white,
       fontSize: 24,
       fontWeight: FontWeight.bold,
     );
 
-    if (!_isDashboard) {
+    if (!widget.isDashboard) {
       return AppBar(
         title:
-            _user != null
-                ? Text('Bienvenido ${_user?.email}', style: appBarTextStyle)
+            firebaseUser != null
+                ? Text(
+                  'Bienvenido ${userModel?.name ?? firebaseUser.email}',
+                  style: appBarTextStyle,
+                )
                 : const Text('Hoquei Club Cocentaina', style: appBarTextStyle),
         backgroundColor: Colors.red[900],
         centerTitle: true,
         elevation: 5.0,
         actions: <Widget>[
-          if (_user != null)
+          if (firebaseUser != null)
             IconButton(
               icon: const Icon(Icons.exit_to_app, color: Colors.white),
-              onPressed: _onSignOut,
+              onPressed: () => userProvider.signOut(),
             ),
         ],
       );
@@ -100,11 +77,11 @@ class _HccAppBarState extends State<HccAppBar> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
-                  _user != null
+                  firebaseUser != null
                       ? Text(
-                        _userName != null
-                            ? 'Hola $_userName'.trim()
-                            : 'Hola ${_user?.email}',
+                        userModel?.name != null
+                            ? 'Hola ${userModel?.name}'.trim()
+                            : 'Hola ${firebaseUser.email}',
                         style: appBarTextStyle,
                         textAlign: TextAlign.center,
                       )
@@ -113,9 +90,9 @@ class _HccAppBarState extends State<HccAppBar> {
                         style: appBarTextStyle,
                         textAlign: TextAlign.center,
                       ),
-                  if (_formattedDate != null)
+                  if (widget.formattedDate != null)
                     Text(
-                      _formattedDate!,
+                      widget.formattedDate!,
                       style: const TextStyle(
                         color: Colors.white,
                         fontSize: 14,
@@ -132,10 +109,10 @@ class _HccAppBarState extends State<HccAppBar> {
         centerTitle: true,
         elevation: 25.0,
         actions: [
-          if (_user != null)
+          if (firebaseUser != null)
             IconButton(
               icon: const Icon(Icons.logout, color: Colors.white),
-              onPressed: _onSignOut,
+              onPressed: () => userProvider.signOut(),
             ),
         ],
       );
