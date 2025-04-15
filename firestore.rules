@@ -1,0 +1,72 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // --- Funciones de Ayuda (Helpers) ---
+
+    // Función para verificar si el usuario autenticado es el dueño del documento
+    function isOwner(userId) {
+      return request.auth != null && request.auth.uid == userId;
+    }
+
+    // Función para verificar si se están intentando actualizar SOLO los campos permitidos del perfil
+    function isUpdatingAllowedProfileFields() {
+      // Lista de campos que el usuario SÍ PUEDE modificar desde su perfil
+      let allowedFields = ['name', 'lastname', 'image'];
+      // keys() devuelve una lista de las claves (campos) que vienen en la petición de escritura.
+      // hasOnly() comprueba que la lista de claves SÓLO contenga elementos de allowedFields.
+      return request.resource.data.keys().hasOnly(allowedFields);
+    }
+
+    // Función para validar los datos del perfil que se están actualizando Y asegurar que los campos protegidos no cambian
+    function areProfileFieldsValid() {
+      // request.resource.data representa cómo quedaría el documento DESPUÉS de la actualización
+      let newData = request.resource.data;
+      // resource.data representa cómo está el documento ANTES de la actualización
+      let oldData = resource.data;
+      // Lista de campos que vienen en la petición de actualización
+      let incomingKeys = newData.keys();
+
+      // --- Validaciones de campos (solo si el campo viene en la actualización) ---
+      // Nombre: debe ser string, no vacío, y con longitud máxima (p.ej. < 100)
+      let nameValid = !incomingKeys.hasAny(['name']) || (newData.name is string && newData.name.size() > 0 && newData.name.size() < 100);
+      // Apellidos: debe ser string, longitud máxima (permitimos vacío?)
+      let lastnameValid = !incomingKeys.hasAny(['lastname']) || (newData.lastname is string && newData.lastname.size() < 100);
+      // Imagen: debe ser string (URL) o null (si la borra), longitud máxima
+      let imageValid = !incomingKeys.hasAny(['image']) || ((newData.image is string && newData.image.size() < 500) || newData.image == null);
+
+      // --- Comprobaciones de Campos Protegidos (¡CRÍTICO!) ---
+      // Asegura que estos campos NO cambian comparando el nuevo valor con el antiguo.
+      let emailUnchanged = newData.email == oldData.email;
+      let roleUnchanged = newData.role == oldData.role;
+      // createdAt: Compara con el valor antiguo (usando .get() por si no existía antes). No debe cambiar.
+      let createdAtUnchanged = newData.created_at == oldData.get('created_at', null);
+
+      // Devuelve true sólo si todas las validaciones y comprobaciones pasan
+      return nameValid && lastnameValid && imageValid && emailUnchanged && roleUnchanged && createdAtUnchanged;
+    }
+
+    // --- REGLAS PARA LA COLECCIÓN 'users' ---
+    match /users/{userId} {
+
+      // LEER: Permitido si es el dueño
+      allow read: if isOwner(userId);
+
+      // CREAR: Permitido si es el dueño.
+      // TODO: Añadir validación para la creación (campos obligatorios, rol por defecto 'user'?)
+      // Ejemplo: allow create: if isOwner(userId) && isCreateDataValid();
+      allow create: if isOwner(userId);
+
+      // ACTUALIZAR: Permitido si es dueño, SOLO se actualizan campos permitidos Y los datos son válidos/protegidos.
+      allow update: if isOwner(userId) && isUpdatingAllowedProfileFields() && areProfileFieldsValid();
+
+      // BORRAR: No permitido desde el cliente
+      allow delete: if false;
+
+    } // Fin /users/{userId}
+
+    // Aquí irían reglas para otras colecciones...
+
+  } // Fin /databases/{database}/documents
+} // Fin service cloud.firestore
