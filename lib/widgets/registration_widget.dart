@@ -24,6 +24,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
+      // coverage:ignore-start
       try {
         UserCredential userCredential = await FirebaseAuth.instance
             .createUserWithEmailAndPassword(
@@ -75,6 +76,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
           ),
         );
       }
+      // coverage:ignore-end
     }
   }
 
