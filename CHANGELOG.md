@@ -26,6 +26,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [0.2.8] - 2025-04-17
+
+Agregar comentarios de cobertura para las funciones de restablecimiento de contraseña y registro en los widgets de inicio de sesión y registro.
+
 ## [0.2.7] - 2025-04-11
 
 Actualizar etiquetas de navegación en DashboardPage y refactorizar ProfilePage para inicializar FirebaseAuth y FirebaseFirestore. Agregar pruebas para DashboardPage.
