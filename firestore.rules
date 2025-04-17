@@ -12,11 +12,13 @@ service cloud.firestore {
 
     // Función para verificar si se están intentando actualizar SOLO los campos permitidos del perfil
     function isUpdatingAllowedProfileFields() {
-      // Lista de campos que el usuario SÍ PUEDE modificar desde su perfil
       let allowedFields = ['name', 'lastname', 'image'];
-      // keys() devuelve una lista de las claves (campos) que vienen en la petición de escritura.
-      // hasOnly() comprueba que la lista de claves SÓLO contenga elementos de allowedFields.
-      return request.resource.data.keys().hasOnly(allowedFields);
+      // Obtiene SÓLO las claves que están siendo modificadas en esta petición.
+      let updatedKeys = request.resource.data.diff(resource.data).affectedKeys();
+      // hasOnly() ahora comprueba que las claves modificadas estén DENTRO del conjunto permitido.
+      // Es importante que allowedFields contenga TODOS los campos que legítimamente
+      // podrían actualizarse desde el perfil.
+      return updatedKeys.hasOnly(allowedFields);
     }
 
     // Función para validar los datos del perfil que se están actualizando Y asegurar que los campos protegidos no cambian
