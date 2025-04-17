@@ -37,6 +37,7 @@ config:
           - any-glob-to-any-file:
             - 'pubspec.yaml'
             - '.github/**'
+            - 'lib/auth/**'
 
 github-actions:
   - any:
