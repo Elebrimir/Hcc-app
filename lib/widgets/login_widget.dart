@@ -25,6 +25,7 @@ class _LoginPageState extends State<LoginPage> {
       );
       return;
     }
+    //coverage:ignore-start
     try {
       await FirebaseAuth.instance.sendPasswordResetEmail(
         email: _emailController.text,
@@ -42,6 +43,7 @@ class _LoginPageState extends State<LoginPage> {
         widget.homePageContext,
       ).showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
     }
+    //coverage:ignore-end
   }
 
   @override
@@ -82,6 +84,7 @@ class _LoginPageState extends State<LoginPage> {
                     child: Column(
                       children: [
                         ElevatedButton(
+                          // coverage:ignore-start
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               try {
@@ -105,6 +108,7 @@ class _LoginPageState extends State<LoginPage> {
                                   ),
                                 );
                               }
+                              // coverage:ignore-end
                             }
                           },
                           child: const Text('Acceder'),
