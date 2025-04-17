@@ -8,7 +8,6 @@ import 'package:hcc_app/pages/dashboard_page.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key, required this.homePageContext});
-
   final BuildContext homePageContext;
 
   @override
@@ -87,33 +86,25 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               try {
-                                final userCredential = await FirebaseAuth
-                                    .instance
+                                await FirebaseAuth.instance
                                     .signInWithEmailAndPassword(
-                                      email: _emailController.text,
+                                      email: _emailController.text.trim(),
                                       password: _passwordController.text,
                                     );
                                 debugPrint(
-                                  'User ${userCredential.user!.email} logged in',
+                                  'User logged in: ${_emailController.text}',
                                 );
                                 if (mounted) Navigator.of(context).pop();
-                                Navigator.pushReplacement(
-                                  widget.homePageContext,
-                                  MaterialPageRoute(
-                                    builder: (_) => const DashboardPage(),
+                              } on FirebaseAuthException catch (e) {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  // Usamos el context del Dialog
+                                  SnackBar(
+                                    content: Text(
+                                      'Error al iniciar sesión: ${e.message}',
+                                    ),
+                                    backgroundColor: Colors.red,
                                   ),
                                 );
-                              } on FirebaseAuthException catch (e) {
-                                debugPrint('Failed to log in: ${e.message}');
-                                if (mounted) {
-                                  ScaffoldMessenger.of(
-                                    widget.homePageContext,
-                                  ).showSnackBar(
-                                    SnackBar(
-                                      content: Text('Error: ${e.message}'),
-                                    ),
-                                  );
-                                }
                               }
                             }
                           },

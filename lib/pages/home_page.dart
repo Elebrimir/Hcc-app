@@ -1,12 +1,9 @@
 // Copyright (c) 2025 HCC. All rights reserved.
 // Use of this source code is governed by an MIT-style license that can be
 // found in the LICENSE file.
-
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:hcc_app/pages/dashboard_page.dart';
-import 'package:hcc_app/pages/login_page.dart';
-import 'package:hcc_app/pages/registration_page.dart';
+import 'package:hcc_app/widgets/login_widget.dart';
+import 'package:hcc_app/widgets/registration_widget.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
@@ -19,36 +16,20 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  User? _user;
+  late final user = Provider.of<UserProvider>(context).firebaseUser;
+  late final userName = user?.displayName;
 
   @override
   void initState() {
     super.initState();
-    FirebaseAuth.instance.authStateChanges().listen((User? user) {
-      setState(() {
-        _user = user;
-      });
-
-      if (_user != null) {
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const DashboardPage()),
-          );
-        });
-      }
-    });
   }
 
   @override
   Widget build(BuildContext context) {
-    final userProvider = Provider.of<UserProvider>(context);
-
     return Scaffold(
       appBar: HccAppBar(
-        user: userProvider.firebaseUser,
-        userName:
-            null, // Deja que el HccAppBar cargue el nombre desde Firestore
+        user: user,
+        userName: userName,
         formattedDate: DateTime.now().toString(),
         isDashboard: false,
       ),
@@ -64,8 +45,7 @@ class _HomePageState extends State<HomePage> {
                 child: Image.asset('assets/images/logo_club.png'),
               ),
               const SizedBox(height: 20.0),
-              if (FirebaseAuth.instance.currentUser ==
-                  null) // Si no hay usuario autenticado
+              if (user == null) // Si no hay usuario autenticado
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
@@ -87,8 +67,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               const SizedBox(height: 20.0),
-              if (FirebaseAuth.instance.currentUser ==
-                  null) // Si no hay usuario autenticado
+              if (user == null) // Si no hay usuario autenticado
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
@@ -110,11 +89,10 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               const SizedBox(height: 20.0),
-              if (FirebaseAuth.instance.currentUser !=
-                  null) // Si hay usuario autenticado
+              if (user != null) // Si hay usuario autenticado
                 ElevatedButton(
                   onPressed: () {
-                    FirebaseAuth.instance.signOut();
+                    Provider.of<UserProvider>(context, listen: false).signOut();
                   },
                   child: const Text('Cerrar Sesión'),
                 ),

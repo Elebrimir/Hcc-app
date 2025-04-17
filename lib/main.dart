@@ -1,10 +1,13 @@
+// coverage:ignore-file
+// Copyright (c) 2025 HCC. All rights reserved.
+// Use of this source code is governed by an MIT-style license that can be
+// found in the LICENSE file.
 import 'package:flutter/material.dart';
-import 'package:provider/provider.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
-import 'firebase_options.dart';
-import 'providers/user_provider.dart';
-import 'pages/home_page.dart';
+import 'package:provider/provider.dart';
+import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/auth/auth_wrapper.dart';
+import 'package:hcc_app/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -22,23 +25,14 @@ class MyApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return StreamBuilder(
-      stream: FirebaseAuth.instance.authStateChanges(),
-      builder: (context, snapshot) {
-        if (snapshot.hasData) {
-          return MaterialApp(
-            title: 'HCC App',
-            theme: ThemeData(primarySwatch: Colors.red),
-            home: const HomePage(),
-          );
-        } else {
-          return MaterialApp(
-            title: 'HCC App',
-            theme: ThemeData(primarySwatch: Colors.red),
-            home: HomePage(),
-          );
-        }
-      },
+    return MaterialApp(
+      title: 'HCC App',
+      theme: ThemeData(
+        primarySwatch: Colors.red,
+        visualDensity: VisualDensity.adaptivePlatformDensity,
+      ),
+      home: const AuthWrapper(),
+      debugShowCheckedModeBanner: false,
     );
   }
 }
