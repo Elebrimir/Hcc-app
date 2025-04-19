@@ -28,6 +28,30 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [0.2.9] - 2025-04-19
+
+feat: Add image_picker and firebase_storage dependencies
+
+feat: Implement Firebase Storage rules for user profile images
+
+test: Update dashboard_page_test to include profile navigation and mock user provider
+
+test: Refactor firebase_auth_test to include copyright and license comments
+
+test: Enhance hcc_app_bar_test with copyright and license comments
+
+test: Improve login_page_test with copyright and license comments
+
+test: Refactor profile_page_test to include mock user provider and network image mocking
+
+test: Update registration_page_test with copyright and license comments
+
+test: Add copyright and license comments to user_model_test
+
+fix: Register file_selector_windows and firebase_storage plugins in Windows
+
+fix: Update generated_plugins.cmake to include new plugins
+
 ## [0.2.8] - 2025-04-17
 
 Agregar comentarios de cobertura para las funciones de restablecimiento de contraseña y registro en los widgets de inicio de sesión y registro.
