@@ -1,155 +1,176 @@
-// ignore_for_file: subtype_of_sealed_class
+// ignore_for_file: subtype_of_sealed_class, prefer_const_constructors
+// Copyright (c) 2025 HCC. All rights reserved.
+// Use of this source code is governed by an MIT-style license that can be
+// found in the LICENSE file.
 
-import 'package:flutter_test/flutter_test.dart';
-import 'package:hcc_app/pages/profile_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_test/flutter_test.dart';
+import 'package:hcc_app/models/user_model.dart';
+import 'package:hcc_app/pages/profile_page.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 import 'package:mocktail/mocktail.dart';
-
-// Mocks necesarios
-class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:network_image_mock/network_image_mock.dart';
 
 class MockUser extends Mock implements User {}
 
-class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
-
-class MockCollectionReference extends Mock
-    implements CollectionReference<Map<String, dynamic>> {}
-
-class MockDocumentReference extends Mock
-    implements DocumentReference<Map<String, dynamic>> {}
-
-class MockDocumentSnapshot extends Mock
-    implements DocumentSnapshot<Map<String, dynamic>> {}
+class MockUserProvider extends Mock
+    with ChangeNotifier
+    implements UserProvider {}
 
 void main() {
-  late MockFirebaseAuth mockAuth;
-  late MockFirebaseFirestore mockFirestore;
-  late MockUser mockUser;
-  late MockCollectionReference mockCollection;
-  late MockDocumentReference mockDocRef;
-  late MockDocumentSnapshot mockSnapshot;
+  late MockUserProvider mockUserProvider;
+  late MockUser mockFirebaseUser;
+  late UserModel testUserModel;
+
+  setUpAll(() {
+    registerFallbackValue(File('dummy_path_for_fallback'));
+  });
 
   setUp(() {
-    mockAuth = MockFirebaseAuth();
-    mockFirestore = MockFirebaseFirestore();
-    mockUser = MockUser();
-    mockCollection = MockCollectionReference();
-    mockDocRef = MockDocumentReference();
-    mockSnapshot = MockDocumentSnapshot();
+    mockUserProvider = MockUserProvider();
+    mockFirebaseUser = MockUser();
+    when(() => mockFirebaseUser.uid).thenReturn('test_uid');
+    when(() => mockFirebaseUser.email).thenReturn('test@example.com');
 
-    // Configuración de los mocks en orden correcto (sin anidamiento)
-    when(() => mockAuth.currentUser).thenReturn(mockUser);
-    when(() => mockUser.uid).thenReturn('test_uid');
-    when(() => mockUser.email).thenReturn('test@example.com');
-    when(() => mockUser.displayName).thenReturn('Test User');
-
-    // Configuración de Firestore
-    when(() => mockFirestore.collection('users')).thenReturn(mockCollection);
-    when(() => mockCollection.doc('test_uid')).thenReturn(mockDocRef);
-    when(() => mockDocRef.get()).thenAnswer((_) async => mockSnapshot);
-  });
-
-  testWidgets('Muestra CircularProgressIndicator inicialmente', (tester) async {
-    await tester.pumpWidget(
-      MaterialApp(home: ProfilePage(auth: mockAuth, firestore: mockFirestore)),
+    testUserModel = UserModel(
+      email: 'test@example.com',
+      name: 'Test',
+      lastname: 'User',
+      role: 'tester',
+      image: 'https://via.placeholder.com/150',
+      createdAt: Timestamp.now(),
     );
 
-    expect(find.byType(CircularProgressIndicator), findsOneWidget);
+    when(() => mockUserProvider.firebaseUser).thenReturn(mockFirebaseUser);
+    when(() => mockUserProvider.userModel).thenReturn(testUserModel);
+    when(() => mockUserProvider.isUploadingImage).thenReturn(false);
+    when(() => mockUserProvider.isSavingProfile).thenReturn(false);
+
+    when(
+      () => mockUserProvider.uploadProfileImage(any()),
+    ).thenAnswer((_) async => true);
+    when(
+      () => mockUserProvider.saveUserProfileDetails(
+        name: any(named: 'name'),
+        lastname: any(named: 'lastname'),
+      ),
+    ).thenAnswer((_) async => true);
   });
 
-  testWidgets('Muestra error cuando no hay usuario autenticado', (
+  Widget createWidgetUnderTest() {
+    return ChangeNotifierProvider<UserProvider>.value(
+      value: mockUserProvider,
+      child: MaterialApp(home: Scaffold(body: ProfilePage())),
+    );
+  }
+
+  testWidgets(
+    'Muestra CircularProgressIndicator inicialmente si userModel es null',
+    (tester) async {
+      when(() => mockUserProvider.firebaseUser).thenReturn(mockFirebaseUser);
+      when(() => mockUserProvider.userModel).thenReturn(null);
+      when(() => mockUserProvider.isUploadingImage).thenReturn(false);
+      when(() => mockUserProvider.isSavingProfile).thenReturn(false);
+
+      await tester.pumpWidget(createWidgetUnderTest());
+
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.byType(ListView), findsNothing);
+    },
+  );
+
+  testWidgets('Muestra mensaje para iniciar sesión si firebaseUser es null', (
     tester,
   ) async {
-    // Sobrescribir el mock para este test
-    when(() => mockAuth.currentUser).thenReturn(null);
+    when(() => mockUserProvider.firebaseUser).thenReturn(null);
+    when(() => mockUserProvider.userModel).thenReturn(null);
 
-    await tester.pumpWidget(
-      MaterialApp(home: ProfilePage(auth: mockAuth, firestore: mockFirestore)),
-    );
+    await tester.pumpWidget(createWidgetUnderTest());
 
-    await tester.pumpAndSettle();
-
-    // El texto se muestra con el prefijo "Error:"
-    expect(
-      find.text('Error: No hi ha ninún usuari autenticat.'),
-      findsOneWidget,
-    );
+    expect(find.text('Si us plau, inicia sessió.'), findsOneWidget);
+    expect(find.byType(CircularProgressIndicator), findsNothing);
+    expect(find.byType(ListView), findsNothing);
   });
 
-  testWidgets('Muestra datos del usuario cuando se cargan correctamente', (
-    tester,
-  ) async {
-    when(() => mockSnapshot.exists).thenReturn(true);
-    when(() => mockSnapshot.data()).thenReturn({
-      'name': 'Test',
-      'lastname': 'User',
-      'email': 'test@example.com',
-      'role': 'user',
-      'image': '',
-    });
+  testWidgets(
+    'Muestra CircularProgressIndicator si userModel es null pero hay usuario (estado inicial)',
+    (tester) async {
+      when(() => mockUserProvider.firebaseUser).thenReturn(mockFirebaseUser);
+      when(() => mockUserProvider.userModel).thenReturn(null);
+      when(() => mockUserProvider.isUploadingImage).thenReturn(false);
+      when(() => mockUserProvider.isSavingProfile).thenReturn(false);
 
-    await tester.pumpWidget(
-      MaterialApp(home: ProfilePage(auth: mockAuth, firestore: mockFirestore)),
-    );
+      await tester.pumpWidget(createWidgetUnderTest());
 
-    await tester.pumpAndSettle();
+      expect(find.byType(CircularProgressIndicator), findsOneWidget);
+      expect(find.text('No s\'han pogut carregar les dades.'), findsNothing);
+      expect(find.byType(ListView), findsNothing);
+    },
+  );
 
-    expect(find.text('Test'), findsOneWidget);
-    expect(find.text('User'), findsOneWidget);
-    expect(find.text('test@example.com'), findsOneWidget);
-    expect(find.text('user'), findsOneWidget);
-  });
+  testWidgets(
+    'Muestra los datos del usuario cuando userModel está disponible',
+    (tester) async {
+      await mockNetworkImagesFor(() async {
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-  testWidgets('Muestra error cuando falla la carga del perfil', (tester) async {
-    // Sobrescribir el comportamiento para este test
-    when(() => mockDocRef.get()).thenThrow(Exception('Error de conexión'));
+        expect(
+          find.widgetWithText(TextFormField, 'test@example.com'),
+          findsOneWidget,
+        );
+        expect(find.widgetWithText(TextFormField, 'tester'), findsOneWidget);
+        expect(find.widgetWithText(TextFormField, 'Test'), findsOneWidget);
+        expect(find.widgetWithText(TextFormField, 'User'), findsOneWidget);
+        expect(find.byType(CircleAvatar), findsOneWidget);
+      });
+    },
+  );
 
-    await tester.pumpWidget(
-      MaterialApp(home: ProfilePage(auth: mockAuth, firestore: mockFirestore)),
-    );
+  testWidgets(
+    'Llama a userProvider.saveUserProfileDetails al pulsar "Desa canvis"',
+    (tester) async {
+      await mockNetworkImagesFor(() async {
+        when(
+          () => mockUserProvider.saveUserProfileDetails(
+            name: 'Nuevo Nombre',
+            lastname: 'Nuevo Apellido',
+          ),
+        ).thenAnswer((_) async => true);
 
-    await tester.pumpAndSettle();
+        await tester.pumpWidget(createWidgetUnderTest());
+        await tester.pumpAndSettle();
 
-    // El mensaje de error incluye el prefijo 'Error:' y los detalles de la excepción
-    expect(
-      find.textContaining('Error: Error al carregar el perfil d\'usuari'),
-      findsOneWidget,
-    );
-  });
+        final nameFieldFinder = find.byType(TextFormField).at(2);
+        final lastnameFieldFinder = find.byType(TextFormField).at(3);
+        final saveButtonFinder = find.widgetWithText(
+          ElevatedButton,
+          'Desa canvis',
+        );
 
-  testWidgets('Guarda los cambios correctamente', (tester) async {
-    when(() => mockSnapshot.exists).thenReturn(true);
-    when(() => mockSnapshot.data()).thenReturn({
-      'name': 'Test',
-      'lastname': 'User',
-      'email': 'test@example.com',
-      'role': 'user',
-      'image': '',
-    });
-    when(() => mockDocRef.update(any())).thenAnswer((_) async => {});
+        expect(nameFieldFinder, findsOneWidget);
+        expect(lastnameFieldFinder, findsOneWidget);
+        expect(saveButtonFinder, findsOneWidget);
 
-    await tester.pumpWidget(
-      MaterialApp(home: ProfilePage(auth: mockAuth, firestore: mockFirestore)),
-    );
+        await tester.enterText(nameFieldFinder, 'Nuevo Nombre');
+        await tester.enterText(lastnameFieldFinder, 'Nuevo Apellido');
+        await tester.pump();
 
-    await tester.pumpAndSettle();
+        await tester.tap(saveButtonFinder);
+        await tester.pumpAndSettle();
 
-    // Editar los campos
-    await tester.enterText(find.byType(TextFormField).at(2), 'Nuevo Nombre');
-    await tester.enterText(find.byType(TextFormField).at(3), 'Nuevo Apellido');
-
-    // Pulsar el botón de guardar
-    await tester.tap(find.text('Desa canvis'));
-    await tester.pump();
-
-    // Verificar que se llamó al método update
-    verify(
-      () => mockDocRef.update({
-        'name': 'Nuevo Nombre',
-        'lastname': 'Nuevo Apellido',
-      }),
-    ).called(1);
-  });
+        verify(
+          () => mockUserProvider.saveUserProfileDetails(
+            name: 'Nuevo Nombre',
+            lastname: 'Nuevo Apellido',
+          ),
+        ).called(1);
+        expect(find.text('Perfil desat correctament!'), findsOneWidget);
+      });
+    },
+  );
 }
