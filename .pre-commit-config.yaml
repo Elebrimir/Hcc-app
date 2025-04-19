@@ -27,4 +27,3 @@ repos:
         args: ["analyze"]
         language: system
         pass_filenames: false
-

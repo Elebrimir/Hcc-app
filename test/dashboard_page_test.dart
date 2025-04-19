@@ -1,65 +1,91 @@
+// ignore_for_file: subtype_of_sealed_class, prefer_const_constructors
+// Copyright (c) 2025 HCC. All rights reserved.
+// Use of this source code is governed by an MIT-style license that can be
+// found in the LICENSE file.
+
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/models/user_model.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:provider/provider.dart';
 import 'package:hcc_app/pages/dashboard_page.dart';
+import 'package:hcc_app/pages/profile_page.dart';
 import 'package:hcc_app/providers/user_provider.dart';
-
-// Mocks para mantener la coherencia con profile_page_test
-class MockFirebaseAuth extends Mock implements FirebaseAuth {}
+import 'package:mocktail/mocktail.dart';
+import 'package:provider/provider.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MockUser extends Mock implements User {}
 
-class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
+class MockUserProviderManual extends ChangeNotifier implements UserProvider {
+  final MockUser _mockFirebaseUser = MockUser();
+  final UserModel _testUserModel;
 
-class MockUserProvider extends ChangeNotifier implements UserProvider {
-  final _mockUser = MockUser();
+  MockUserProviderManual()
+    : _testUserModel = UserModel(
+        email: 'mock@example.com',
+        name: 'MockName',
+        lastname: 'MockLastName',
+        role: 'mockRole',
+        image: '',
+        createdAt: Timestamp.now(),
+      ) {
+    when(() => _mockFirebaseUser.uid).thenReturn('test_uid_manual');
+    when(() => _mockFirebaseUser.email).thenReturn('mock@example.com');
+  }
 
   @override
-  User? get firebaseUser => _mockUser;
+  User? get firebaseUser => _mockFirebaseUser;
 
   @override
-  UserModel? get userModel => UserModel(
-    name: 'MockName',
-    lastname: 'MockLastName',
-    email: 'mock@example.com',
-    role: 'mockRole',
-  );
+  UserModel? get userModel => _testUserModel;
 
+  @override
+  bool get isUploadingImage => false;
+
+  @override
+  bool get isSavingProfile => false;
+
+  @override
+  Future<bool> uploadProfileImage(File imageFile) async => true;
+  @override
+  Future<bool> saveUserProfileDetails({
+    required String name,
+    required String lastname,
+  }) async => true;
   @override
   Future<void> initializeUser({
     User? mockUser,
     FirebaseFirestore? mockFirestore,
-  }) async {
-    // No se implementa lógica adicional
-  }
-
+  }) async {}
   @override
-  Future<void> signOut() async {
-    // No se implementa lógica adicional
-  }
+  Future<void> signOut() async {}
 }
 
 void main() {
-  late MockUserProvider mockUserProvider;
+  late MockUserProviderManual mockUserProvider;
+
+  setUpAll(() {
+    registerFallbackValue(File('dummy_path_for_fallback'));
+  });
 
   setUp(() {
-    mockUserProvider = MockUserProvider();
+    resetMocktailState();
+    mockUserProvider = MockUserProviderManual();
   });
 
   Widget createTestableWidget() {
     return MaterialApp(
-      home: ChangeNotifierProvider<UserProvider>(
-        create: (_) => mockUserProvider,
+      home: ChangeNotifierProvider<UserProvider>.value(
+        value: mockUserProvider,
         child: const DashboardPage(),
       ),
     );
   }
 
-  testWidgets('Muestra "Inici" al cargar la página', (tester) async {
+  // --- Tests ---
+
+  testWidgets('Muestra "Inici" inicialmente', (tester) async {
     await tester.pumpWidget(createTestableWidget());
     expect(find.text("Inici"), findsOneWidget);
   });
@@ -68,17 +94,30 @@ void main() {
     tester,
   ) async {
     await tester.pumpWidget(createTestableWidget());
-    await tester.tap(find.byIcon(Icons.calendar_today));
+
+    final calendarIconFinder = find.byIcon(Icons.calendar_today);
+    expect(calendarIconFinder, findsOneWidget);
+    await tester.tap(calendarIconFinder);
     await tester.pumpAndSettle();
+
     expect(find.text("Calendari"), findsOneWidget);
+    expect(find.text("Inici"), findsNothing);
   });
 
-  // testWidgets('Navega a la tercera pestaña y muestra ProfilePage', (
-  //   tester,
-  // ) async {
-  //   await tester.pumpWidget(createTestableWidget());
-  //   await tester.tap(find.byIcon(Icons.person));
-  //   await tester.pumpAndSettle();
-  //   expect(find.byType(ProfilePage), findsOneWidget);
-  // });
+  testWidgets('Navega a la tercera pestaña y muestra ProfilePage', (
+    tester,
+  ) async {
+    await tester.pumpWidget(createTestableWidget());
+
+    final profileIconFinder = find.byIcon(Icons.person);
+    expect(profileIconFinder, findsOneWidget);
+    await tester.tap(profileIconFinder);
+    await tester.pumpAndSettle();
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(find.byType(ProfilePage), findsOneWidget);
+    expect(find.byType(ListView), findsOneWidget);
+    expect(find.text("Inici"), findsNothing);
+    expect(find.text("Calendari"), findsNothing);
+  });
 }

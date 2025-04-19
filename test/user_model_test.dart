@@ -1,18 +1,19 @@
+// Copyright (c) 2025 HCC. All rights reserved.
+// Use of this source code is governed by an MIT-style license that can be
+// found in the LICENSE file.
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hcc_app/models/user_model.dart';
 
-// Clase que simula DocumentSnapshot usando composición
 class TestDocumentSnapshot {
   final Map<String, dynamic> _data;
 
   TestDocumentSnapshot(this._data);
 
-  // Método que imita el comportamiento de DocumentSnapshot.data()
   Map<String, dynamic> data() => _data;
 }
 
-// Extiende tu modelo para que acepte TestDocumentSnapshot para pruebas
 extension UserModelTestExtension on UserModel {
   static UserModel fromTest(TestDocumentSnapshot snapshot) {
     final data = snapshot.data();
@@ -86,7 +87,6 @@ void main() {
       expect(data['lastname'], 'User');
       expect(data['role'], 'member');
       expect(data['image'], 'test_image.jpg');
-      // No podemos probar el FieldValue.serverTimestamp() directamente
     });
 
     test('should handle null values in fromFirestore', () {

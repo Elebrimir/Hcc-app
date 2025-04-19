@@ -1,0 +1,27 @@
+rules_version = '2';
+
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    // Regla específica para las imágenes de perfil
+    // Permite escribir en profile_images/ID_DEL_USUARIO/cualquier_archivo
+    match /profile_images/{userId}/{allPaths=**} {
+
+      // Permitir LECTURA (opcional, ajusta según necesites):
+      // Ejemplo: cualquier usuario autenticado puede leerlas
+      allow read: if request.auth != null;
+
+      // Permitir ESCRITURA (¡IMPORTANTE!):
+      // Solo si el usuario está autenticado (request.auth != null)
+      // Y el ID del usuario autenticado (request.auth.uid)
+      // es IGUAL al userId de la carpeta donde intenta escribir.
+      allow write: if request.auth != null && request.auth.uid == userId;
+
+      // No permitir borrar por defecto desde el cliente
+      allow delete: if false;
+    }
+
+    // Puedes añadir otras reglas 'match' para otras carpetas aquí si es necesario
+
+  }
+}
