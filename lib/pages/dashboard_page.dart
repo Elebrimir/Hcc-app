@@ -4,6 +4,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:hcc_app/pages/profile_page.dart';
+import 'package:hcc_app/pages/user_list_page.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
@@ -37,6 +38,7 @@ class _DashboardPageState extends State<DashboardPage> {
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),
+      const UserListPage(),
       const ProfilePage(),
     ];
   }
@@ -66,12 +68,17 @@ class _DashboardPageState extends State<DashboardPage> {
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
+        type: BottomNavigationBarType.fixed,
+        backgroundColor: Colors.grey[900],
+        selectedItemColor: Theme.of(context).colorScheme.primary,
+        unselectedItemColor: Colors.grey[500],
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
           BottomNavigationBarItem(
             icon: Icon(Icons.calendar_today),
             label: 'Agenda',
           ),
+          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Usuaris'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),
@@ -104,13 +111,13 @@ class _DashboardPageState extends State<DashboardPage> {
       'Dissabte',
       'Diumenge',
     ];
+    final diaSemana = dias[now.weekday - 1];
+    final mes = meses[now.month - 1];
+    final dia = now.day;
+    final any = now.year;
 
-    if (meses[now.month - 1] == 'Abril' ||
-        meses[now.month - 1] == 'Agost' ||
-        meses[now.month - 1] == 'Octubre') {
-      return '${dias[now.weekday - 1]}, ${now.day} d\'${meses[now.month - 1]} de ${now.year}';
-    } else {
-      return '${dias[now.weekday - 1]}, ${now.day} de ${meses[now.month - 1]} de ${now.year}';
-    }
+    final article = (mes.startsWith('A') || mes.startsWith('O')) ? "d'" : "de";
+
+    return "$diaSemana, $dia $article$mes de $any";
   }
 }

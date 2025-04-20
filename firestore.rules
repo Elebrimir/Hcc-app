@@ -55,6 +55,10 @@ service cloud.firestore {
       // LEER: Permitido si es el dueño
       allow read: if isOwner(userId);
 
+      // LISTAR Colección (LIST): Permitido para CUALQUIER usuario autenticado.
+      // Esto permite que .collection('users').snapshots() o .collection('users').get() funcionen.
+      allow list: if request.auth != null;
+
       // CREAR: Permitido si es el dueño.
       // TODO: Añadir validación para la creación (campos obligatorios, rol por defecto 'user'?)
       // Ejemplo: allow create: if isOwner(userId) && isCreateDataValid();

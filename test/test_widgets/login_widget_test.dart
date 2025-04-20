@@ -14,9 +14,9 @@ class MockUserCredential extends Mock implements UserCredential {}
 
 class MockUser extends Mock implements User {}
 
-class LoginPageTestWrapper extends StatelessWidget {
+class LoginWidgetTestWrapper extends StatelessWidget {
   // ignore: use_super_parameters
-  const LoginPageTestWrapper({super.key});
+  const LoginWidgetTestWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +35,7 @@ void main() {
     testWidgets('Shows validation error for empty email on login button tap', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const LoginPageTestWrapper());
+      await tester.pumpWidget(const LoginWidgetTestWrapper());
 
       final loginButton = find.widgetWithText(ElevatedButton, 'Acceder');
       expect(loginButton, findsOneWidget);
@@ -49,7 +49,7 @@ void main() {
     testWidgets(
       'Shows validation error for empty email when tapping forgot password',
       (WidgetTester tester) async {
-        await tester.pumpWidget(const LoginPageTestWrapper());
+        await tester.pumpWidget(const LoginWidgetTestWrapper());
 
         final forgotPasswordButton = find.widgetWithText(
           TextButton,
@@ -66,7 +66,7 @@ void main() {
     testWidgets(
       'Shows validation error for empty password when only an email is entered',
       (WidgetTester tester) async {
-        await tester.pumpWidget(const LoginPageTestWrapper());
+        await tester.pumpWidget(const LoginWidgetTestWrapper());
 
         final emailField = find.widgetWithText(TextFormField, 'Email');
         expect(emailField, findsOneWidget);
@@ -88,7 +88,7 @@ void main() {
     testWidgets(
       'Shows validation error for empty email when only a password is entered',
       (WidgetTester tester) async {
-        await tester.pumpWidget(const LoginPageTestWrapper());
+        await tester.pumpWidget(const LoginWidgetTestWrapper());
 
         final passwordField = find.widgetWithText(TextFormField, 'Contraseña');
         expect(passwordField, findsOneWidget);
@@ -107,7 +107,7 @@ void main() {
     testWidgets('TextFields should hold their values', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const LoginPageTestWrapper());
+      await tester.pumpWidget(const LoginWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       final passwordField = find.widgetWithText(TextFormField, 'Contraseña');
@@ -123,7 +123,7 @@ void main() {
     testWidgets('Forgot password works with valid email', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const LoginPageTestWrapper());
+      await tester.pumpWidget(const LoginWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       await tester.enterText(emailField, 'test@example.com');
@@ -134,7 +134,7 @@ void main() {
     testWidgets('Forgot password button is displayed', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const LoginPageTestWrapper());
+      await tester.pumpWidget(const LoginWidgetTestWrapper());
 
       final forgotPasswordButton = find.widgetWithText(
         TextButton,
@@ -144,7 +144,7 @@ void main() {
     });
 
     testWidgets('Form submits with valid inputs', (WidgetTester tester) async {
-      await tester.pumpWidget(const LoginPageTestWrapper());
+      await tester.pumpWidget(const LoginWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       final passwordField = find.widgetWithText(TextFormField, 'Contraseña');
@@ -164,7 +164,7 @@ void main() {
     });
 
     testWidgets('Login page displays correctly', (WidgetTester tester) async {
-      await tester.pumpWidget(const LoginPageTestWrapper());
+      await tester.pumpWidget(const LoginWidgetTestWrapper());
 
       expect(find.text('Acceso'), findsOneWidget);
 
