@@ -5,6 +5,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hcc_app/models/user_model.dart';
+import 'package:mockito/mockito.dart';
 
 class TestDocumentSnapshot {
   final Map<String, dynamic> _data;
@@ -26,6 +27,17 @@ extension UserModelTestExtension on UserModel {
       createdAt: data['created_at'],
     );
   }
+}
+
+// ignore: subtype_of_sealed_class
+class MockDocumentSnapshot extends Mock
+    implements DocumentSnapshot<Map<String, dynamic>> {
+  final Map<String, dynamic> _data;
+
+  MockDocumentSnapshot(this._data);
+
+  @override
+  Map<String, dynamic>? data() => _data;
 }
 
 void main() {
@@ -60,8 +72,8 @@ void main() {
         'created_at': timestamp,
       };
 
-      final testSnapshot = TestDocumentSnapshot(data);
-      final model = UserModelTestExtension.fromTest(testSnapshot);
+      final mockSnapshot = MockDocumentSnapshot(data);
+      final model = UserModel.fromFirestore(mockSnapshot, null);
 
       expect(model.email, 'test@example.com');
       expect(model.name, 'Test');

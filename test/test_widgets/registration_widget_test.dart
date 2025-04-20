@@ -17,8 +17,8 @@ class MockUser extends Mock implements User {}
 
 class MockFirebaseFirestore extends Mock implements FirebaseFirestore {}
 
-class RegistrationPageTestWrapper extends StatelessWidget {
-  const RegistrationPageTestWrapper({super.key});
+class RegistrationWidgetTestWrapper extends StatelessWidget {
+  const RegistrationWidgetTestWrapper({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -38,7 +38,7 @@ void main() {
     testWidgets(
       'Shows validation error for empty fields on register button tap',
       (WidgetTester tester) async {
-        await tester.pumpWidget(const RegistrationPageTestWrapper());
+        await tester.pumpWidget(const RegistrationWidgetTestWrapper());
 
         final registerButton = find.widgetWithText(
           ElevatedButton,
@@ -60,7 +60,7 @@ void main() {
     testWidgets('Shows validation error for invalid email', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const RegistrationPageTestWrapper());
+      await tester.pumpWidget(const RegistrationWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       await tester.enterText(emailField, 'invalid-email');
@@ -75,7 +75,7 @@ void main() {
     testWidgets('Shows validation error for short password', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const RegistrationPageTestWrapper());
+      await tester.pumpWidget(const RegistrationWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       final passwordField = find.widgetWithText(TextFormField, 'Contraseña');
@@ -95,7 +95,7 @@ void main() {
     testWidgets('Shows validation error for non-matching passwords', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const RegistrationPageTestWrapper());
+      await tester.pumpWidget(const RegistrationWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       final passwordField = find.widgetWithText(TextFormField, 'Contraseña');
@@ -118,7 +118,7 @@ void main() {
     testWidgets('TextFields should hold their values', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const RegistrationPageTestWrapper());
+      await tester.pumpWidget(const RegistrationWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       final passwordField = find.widgetWithText(TextFormField, 'Contraseña');
@@ -137,7 +137,7 @@ void main() {
     });
 
     testWidgets('Form submits with valid inputs', (WidgetTester tester) async {
-      await tester.pumpWidget(const RegistrationPageTestWrapper());
+      await tester.pumpWidget(const RegistrationWidgetTestWrapper());
 
       final emailField = find.widgetWithText(TextFormField, 'Email');
       final passwordField = find.widgetWithText(TextFormField, 'Contraseña');
@@ -166,7 +166,7 @@ void main() {
     testWidgets('Registration page displays correctly', (
       WidgetTester tester,
     ) async {
-      await tester.pumpWidget(const RegistrationPageTestWrapper());
+      await tester.pumpWidget(const RegistrationWidgetTestWrapper());
 
       expect(find.text('Registro'), findsOneWidget);
 
