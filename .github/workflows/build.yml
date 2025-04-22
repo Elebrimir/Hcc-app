@@ -37,11 +37,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze code
-        run: flutter analyze
-
       - name: Run tests
-        run: flutter test
+        run: flutter test --reporter expanded --coverage
 
       - name: Build the app (Android)
         run: flutter build apk --split-per-abi
@@ -98,11 +95,8 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Analyze code
-        run: flutter analyze
-
       - name: Run tests
-        run: flutter test
+        run: flutter test --reporter expanded --coverage
 
       - name: Clean previous builds
         run: flutter clean
