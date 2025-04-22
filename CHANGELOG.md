@@ -29,6 +29,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [1.0.0] - 2025-04-22
+
+feat: Agregar página de listado de usuarios y soporte para mostrar usuarios en Firestore
+
 ## [0.2.9] - 2025-04-19
 
 feat: Add image_picker and firebase_storage dependencies
