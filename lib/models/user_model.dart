@@ -35,6 +35,17 @@ class UserModel {
     );
   }
 
+  factory UserModel.fromMap(Map<String, dynamic> data) {
+    return UserModel(
+      email: data['email'],
+      name: data['name'],
+      lastname: data['lastname'],
+      role: data['role'],
+      image: data['image'],
+      createdAt: data['created_at'] as Timestamp?,
+    );
+  }
+
   Map<String, dynamic> toFirestore() {
     return {
       'email': email,
