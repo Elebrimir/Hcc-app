@@ -1,11 +1,11 @@
 // Copyright (c) 2025 HCC. All rights reserved.
-// Use of this source code is governed by an MIT-style license that can be
-// found in the LICENSE file.
+// Use of this source code is governed by an GNU GENERAL PUBLIC LICENSE
+// license that can be found in the LICENSE file.
 
 import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:hcc_app/models/user_model.dart'; // Asegúrate que la ruta es correcta
-import 'package:hcc_app/providers/user_provider.dart'; // Asegúrate que la ruta es correcta
+import 'package:hcc_app/models/user_model.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
