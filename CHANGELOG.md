@@ -30,6 +30,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [1.0.1] - 2025-04-29
+
+feat: Actualizar la licencia a GNU GENERAL PUBLIC LICENSE en varios archivos y agregar versión 1.0.0 al changelog
+
 ## [1.0.0] - 2025-04-22
 
 feat: Agregar página de listado de usuarios y soporte para mostrar usuarios en Firestore
