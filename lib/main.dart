@@ -1,7 +1,8 @@
 // coverage:ignore-file
 // Copyright (c) 2025 HCC. All rights reserved.
-// Use of this source code is governed by an MIT-style license that can be
-// found in the LICENSE file.
+// Use of this source code is governed by an GNU GENERAL PUBLIC LICENSE
+// license that can be found in the LICENSE file.
+
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
