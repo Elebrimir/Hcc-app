@@ -21,6 +21,8 @@
 [![Dart CI](https://github.com/Elebrimir/Hcc-app/actions/workflows/dart.yml/badge.svg)](https://github.com/Elebrimir/Hcc-app/actions/workflows/dart.yml)
 [![Labeler](https://github.com/Elebrimir/Hcc-app/actions/workflows/label.yml/badge.svg)](https://github.com/Elebrimir/Hcc-app/actions/workflows/label.yml)
 [![codecov](https://codecov.io/gh/Elebrimir/Hcc-app/graph/badge.svg?token=ZR5T8B8ZUI)](https://codecov.io/gh/Elebrimir/Hcc-app)
+![GitHub milestone details](https://img.shields.io/github/milestones/progress-percent/elebrimir/hcc-app/1)
+
 
 ## 📱 Descripción
 
@@ -84,7 +86,7 @@ lib/
 
 ## 📄 Licencia
 
-Este proyecto está bajo la licencia [MIT](LICENSE).
+Este proyecto está bajo la licencia [GNU](LICENSE).
 
 ## 📬 Contacto
 

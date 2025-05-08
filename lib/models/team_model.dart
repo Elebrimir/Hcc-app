@@ -54,19 +54,38 @@ class TeamModel {
 
     final playersList =
         playersData
-            ?.map((player) => UserModel.fromMap(player as Map<String, dynamic>))
+            ?.map((player) {
+              if (player is DocumentReference) {
+                return null;
+              } else {
+                return UserModel.fromMap(player as Map<String, dynamic>);
+              }
+            })
+            .whereType<UserModel>()
             .toList() ??
         [];
     final coachesList =
         coachesData
-            ?.map((coach) => UserModel.fromMap(coach as Map<String, dynamic>))
+            ?.map((coach) {
+              if (coach is DocumentReference) {
+                return null;
+              } else {
+                return UserModel.fromMap(coach as Map<String, dynamic>);
+              }
+            })
+            .whereType<UserModel>()
             .toList() ??
         [];
     final delegatesList =
         delegatesData
-            ?.map(
-              (delegate) => UserModel.fromMap(delegate as Map<String, dynamic>),
-            )
+            ?.map((delegate) {
+              if (delegate is DocumentReference) {
+                return null;
+              } else {
+                return UserModel.fromMap(delegate as Map<String, dynamic>);
+              }
+            })
+            .whereType<UserModel>()
             .toList() ??
         [];
 

@@ -119,7 +119,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final dia = now.day;
     final any = now.year;
 
-    final article = (mes.startsWith('A') || mes.startsWith('O')) ? "d'" : "de";
+    final article = (mes.startsWith('A') || mes.startsWith('O')) ? "d'" : "de ";
 
     return "$diaSemana, $dia $article$mes de $any";
   }
