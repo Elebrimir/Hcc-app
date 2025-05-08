@@ -16,8 +16,6 @@ service cloud.firestore {
       // Obtiene SÓLO las claves que están siendo modificadas en esta petición.
       let updatedKeys = request.resource.data.diff(resource.data).affectedKeys();
       // hasOnly() ahora comprueba que las claves modificadas estén DENTRO del conjunto permitido.
-      // Es importante que allowedFields contenga TODOS los campos que legítimamente
-      // podrían actualizarse desde el perfil.
       return updatedKeys.hasOnly(allowedFields);
     }
 
@@ -31,18 +29,13 @@ service cloud.firestore {
       let incomingKeys = newData.keys();
 
       // --- Validaciones de campos (solo si el campo viene en la actualización) ---
-      // Nombre: debe ser string, no vacío, y con longitud máxima (p.ej. < 100)
       let nameValid = !incomingKeys.hasAny(['name']) || (newData.name is string && newData.name.size() > 0 && newData.name.size() < 100);
-      // Apellidos: debe ser string, longitud máxima (permitimos vacío?)
       let lastnameValid = !incomingKeys.hasAny(['lastname']) || (newData.lastname is string && newData.lastname.size() < 100);
-      // Imagen: debe ser string (URL) o null (si la borra), longitud máxima
       let imageValid = !incomingKeys.hasAny(['image']) || ((newData.image is string && newData.image.size() < 500) || newData.image == null);
 
       // --- Comprobaciones de Campos Protegidos (¡CRÍTICO!) ---
-      // Asegura que estos campos NO cambian comparando el nuevo valor con el antiguo.
       let emailUnchanged = newData.email == oldData.email;
       let roleUnchanged = newData.role == oldData.role;
-      // createdAt: Compara con el valor antiguo (usando .get() por si no existía antes). No debe cambiar.
       let createdAtUnchanged = newData.created_at == oldData.get('created_at', null);
 
       // Devuelve true sólo si todas las validaciones y comprobaciones pasan
@@ -51,28 +44,59 @@ service cloud.firestore {
 
     // --- REGLAS PARA LA COLECCIÓN 'users' ---
     match /users/{userId} {
-
       // LEER: Permitido si es el dueño
       allow read: if isOwner(userId);
 
       // LISTAR Colección (LIST): Permitido para CUALQUIER usuario autenticado.
-      // Esto permite que .collection('users').snapshots() o .collection('users').get() funcionen.
       allow list: if request.auth != null;
 
       // CREAR: Permitido si es el dueño.
-      // TODO: Añadir validación para la creación (campos obligatorios, rol por defecto 'user'?)
-      // Ejemplo: allow create: if isOwner(userId) && isCreateDataValid();
-      allow create: if isOwner(userId);
+      allow create: if isOwner(userId); // Considera añadir validación: && isUserDataValidOnCreate();
 
       // ACTUALIZAR: Permitido si es dueño, SOLO se actualizan campos permitidos Y los datos son válidos/protegidos.
       allow update: if isOwner(userId) && isUpdatingAllowedProfileFields() && areProfileFieldsValid();
 
       // BORRAR: No permitido desde el cliente
       allow delete: if false;
-
     } // Fin /users/{userId}
 
-    // Aquí irían reglas para otras colecciones...
+    // --- REGLAS PARA LA COLECCIÓN 'teams' ---
+    match /teams/{teamId} {
+
+      // LEER (get un documento específico): Permitido para cualquier usuario autenticado.
+      allow get: if request.auth != null;
+
+      // LISTAR (realizar consultas a la colección): Permitido para cualquier usuario autenticado.
+      // Esta regla es la que soluciona el error que estás experimentando.
+      allow list: if request.auth != null;
+
+      // CREAR: Define quién puede crear equipos.
+      // Ejemplo: permitir solo a usuarios con un rol 'admin' (requiere custom claims o un campo 'role' en el doc del usuario)
+      // allow create: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
+      // Por ahora, lo dejamos deshabilitado por seguridad.
+      allow create: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
+
+      // ACTUALIZAR: Define quién puede actualizar equipos.
+      // Ejemplo: permitir a un admin o a coaches/delegados del equipo (requeriría lógica más compleja)
+      // function isTeamStaffOrAdmin(teamDoc) {
+      //   let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
+      //   let isUserAdmin = userRole == 'admin';
+      //   // Asumiendo que 'coaches' y 'delegates' en TeamModel son listas de UIDs de usuarios.
+      //   // Si son listas de objetos UserModel, la comprobación es más compleja aquí.
+      //   // Sería mejor si fueran listas de UIDs.
+      //   let isCoach = request.auth.uid in teamDoc.data.coaches; // Si coaches es List<String> (UIDs)
+      //   let isDelegate = request.auth.uid in teamDoc.data.delegates; // Si delegates es List<String> (UIDs)
+      //   return isUserAdmin || isCoach || isDelegate;
+      // }
+      // allow update: if request.auth != null && isTeamStaffOrAdmin(resource); // y añadir validación de datos: && isTeamDataValid();
+      // Por ahora, lo dejamos deshabilitado por seguridad.
+      allow update: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
+
+      // BORRAR: Define quién puede borrar equipos.
+      // Por ahora, lo dejamos deshabilitado por seguridad.
+      allow delete: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
+
+    } // Fin /teams/{teamId}
 
   } // Fin /databases/{database}/documents
 } // Fin service cloud.firestore

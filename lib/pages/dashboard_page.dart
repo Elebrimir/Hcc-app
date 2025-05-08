@@ -8,6 +8,7 @@ import 'package:hcc_app/pages/user_list_page.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/pages/team_page.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -39,6 +40,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       ),
       const UserListPage(),
+      const TeamPage(),
       const ProfilePage(),
     ];
   }
@@ -79,6 +81,7 @@ class _DashboardPageState extends State<DashboardPage> {
             label: 'Agenda',
           ),
           BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Usuaris'),
+          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Equips'),
           BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
         ],
       ),
@@ -116,7 +119,7 @@ class _DashboardPageState extends State<DashboardPage> {
     final dia = now.day;
     final any = now.year;
 
-    final article = (mes.startsWith('A') || mes.startsWith('O')) ? "d'" : "de";
+    final article = (mes.startsWith('A') || mes.startsWith('O')) ? "d'" : "de ";
 
     return "$diaSemana, $dia $article$mes de $any";
   }
