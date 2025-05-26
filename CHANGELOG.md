@@ -31,6 +31,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [1.0.2] - 2025-05-26
+
+feat: Agregar reglas de etiquetado para archivos Dart en el labeler
+
 ## [1.0.1] - 2025-04-29
 
 feat: Actualizar la licencia a GNU GENERAL PUBLIC LICENSE en varios archivos y agregar versión 1.0.0 al changelog
