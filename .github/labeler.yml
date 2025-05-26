@@ -51,3 +51,10 @@ dependencies:
           - any-glob-to-any-file:
             - 'pubspec.yaml'
             - 'pubspec.lock'
+
+dart:
+  - any:
+      - changed-files:
+          - any-glob-to-any-file:
+            - 'lib/**/*.dart'
+            - 'test/**/*.dart'
