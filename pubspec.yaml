@@ -40,7 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   provider: ^6.1.4
   image_picker: ^1.1.2
-  firebase_storage: ^12.4.7
+  firebase_storage: ^12.4.8
 
 dev_dependencies:
   flutter_test:
