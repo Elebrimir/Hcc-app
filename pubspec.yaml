@@ -30,9 +30,9 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  firebase_core: ^3.14.0
-  cloud_firestore: ^5.6.10
-  firebase_auth: ^5.6.0
+  firebase_core: ^3.15.1
+  cloud_firestore: ^5.6.11
+  firebase_auth: ^5.6.2
   mockito: ^5.4.5
 
   # The following adds the Cupertino Icons font to your application.
@@ -40,14 +40,14 @@ dependencies:
   cupertino_icons: ^1.0.8
   provider: ^6.1.4
   image_picker: ^1.1.2
-  firebase_storage: ^12.4.7
+  firebase_storage: ^12.4.9
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
   fake_cloud_firestore: ^3.1.0
   firebase_auth_mocks: ^0.14.2
-  firebase_core_platform_interface: ^5.4.0
+  firebase_core_platform_interface: ^6.0.0
   flutter_lints: ^6.0.0
   mocktail: ^1.0.4
   plugin_platform_interface: ^2.1.8
