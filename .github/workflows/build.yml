@@ -160,7 +160,7 @@ jobs:
     if: always() && (needs.build_android_app.result == 'success' || needs.build_ios_app.result == 'success')
     steps:
       - name: Download Android analysis
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: apk-size-analysis
           path: size_analysis/android
@@ -168,7 +168,7 @@ jobs:
         continue-on-error: true
 
       - name: Download iOS analysis
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v5
         with:
           name: ios-size-analysis
           path: size_analysis/ios
