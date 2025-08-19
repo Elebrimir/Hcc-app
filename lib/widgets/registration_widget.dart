@@ -21,9 +21,21 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
+  
+  void _showSnackBarSafe(String message, {Color? backgroundColor}) {
+    if (mounted) {
+      ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: backgroundColor,
+        ),
+      );
+    }
+  }
 
   Future<void> _register() async {
     if (_formKey.currentState!.validate()) {
+      final navigator = Navigator.of(context);
       // coverage:ignore-start
       try {
         UserCredential userCredential = await FirebaseAuth.instance
@@ -34,7 +46,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
         debugPrint('User ${userCredential.user!.email} registered');
 
         final User? user = userCredential.user;
-        if (user != null) {
+        if (user != null && mounted) {
           await user.sendEmailVerification();
           debugPrint('Email verification sent to ${user.email}');
 
@@ -51,29 +63,26 @@ class _RegistrationPageState extends State<RegistrationPage> {
               .doc(user.uid)
               .set(userModel.toFirestore());
 
-          ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
-            const SnackBar(
-              content: Text('Usuario registrado correctamente'),
-              backgroundColor: Colors.green,
-            ),
+          _showSnackBarSafe(
+            'Usuario registrado correctamente',
+            backgroundColor: Colors.green,
           );
-          if (mounted) Navigator.of(context).pop();
+          
+          if (mounted) {
+            navigator.pop();
+          }
         }
       } on FirebaseAuthException catch (e) {
         debugPrint('Failed with error code: ${e.message}');
-        ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
-          SnackBar(
-            content: Text('Error: ${e.message}'),
-            backgroundColor: Colors.red,
-          ),
+        _showSnackBarSafe(
+          'Error: ${e.message}',
+          backgroundColor: Colors.red,
         );
       } catch (e) {
         debugPrint('Error desconocido al registrar o guardar datos: $e');
-        ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
-          const SnackBar(
-            content: Text('Error desconocido al registrar o guardar datos'),
-            backgroundColor: Colors.red,
-          ),
+        _showSnackBarSafe(
+          'Error desconocido al registrar o guardar datos',
+          backgroundColor: Colors.red,
         );
       }
       // coverage:ignore-end
