@@ -67,16 +67,18 @@ class _ProfilePageState extends State<ProfilePage> {
       source: ImageSource.gallery,
     );
 
-    if (pickedFile != null) {
+    if (pickedFile != null && mounted) {
       File imageFile = File(pickedFile.path);
       final userProvider = Provider.of<UserProvider>(context, listen: false);
       final success = await userProvider.uploadProfileImage(imageFile);
 
-      if (mounted && success) {
+      if (!mounted) return;
+
+      if (success) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Imatge de perfil actualitzada!')),
         );
-      } else if (mounted && !success) {
+      } else {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Error al pujar la imatge.')),
         );
@@ -87,6 +89,8 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _saveProfileChanges() async {
+    if (!mounted) return;
+    
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     final name = _nameController.text.trim();
@@ -107,11 +111,13 @@ class _ProfilePageState extends State<ProfilePage> {
       lastname: lastname,
     );
 
-    if (mounted && success) {
+    if (!mounted) return;
+
+    if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Perfil desat correctament!')),
       );
-    } else if (mounted && !success) {
+    } else {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Error al desar el perfil.')),
       );
