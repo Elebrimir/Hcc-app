@@ -17,12 +17,21 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
+  
+  void _showSnackBarSafe(String message, {Color? backgroundColor}) {
+    if (mounted) {
+      ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: backgroundColor,
+        ),
+      );
+    }
+  }
 
   Future<void> _forgotPassword() async {
     if (_emailController.text.trim().isEmpty) {
-      ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
-        const SnackBar(content: Text('Por favor, introduce un email')),
-      );
+      _showSnackBarSafe('Por favor, introduce un email');
       return;
     }
     //coverage:ignore-start
@@ -30,18 +39,12 @@ class _LoginPageState extends State<LoginPage> {
       await FirebaseAuth.instance.sendPasswordResetEmail(
         email: _emailController.text,
       );
-      ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
-        const SnackBar(
-          content: Text(
-            'Se ha enviado un email para restablecer la contraseña',
-          ),
-        ),
+      _showSnackBarSafe(
+        'Se ha enviado un email para restablecer la contraseña',
       );
     } on FirebaseAuthException catch (e) {
       debugPrint('Failed to send password reset email: ${e.message}');
-      ScaffoldMessenger.of(
-        widget.homePageContext,
-      ).showSnackBar(SnackBar(content: Text('Error: ${e.message}')));
+      _showSnackBarSafe('Error: ${e.message}');
     }
     //coverage:ignore-end
   }
@@ -87,6 +90,8 @@ class _LoginPageState extends State<LoginPage> {
                           // coverage:ignore-start
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
+                              final navigator = Navigator.of(context);
+                              final scaffoldMessenger = ScaffoldMessenger.of(context);
                               try {
                                 await FirebaseAuth.instance
                                     .signInWithEmailAndPassword(
@@ -96,17 +101,19 @@ class _LoginPageState extends State<LoginPage> {
                                 debugPrint(
                                   'User logged in: ${_emailController.text}',
                                 );
-                                if (mounted) Navigator.of(context).pop();
+                                if (mounted) navigator.pop();
                               } on FirebaseAuthException catch (e) {
-                                ScaffoldMessenger.of(context).showSnackBar(
-                                  // Usamos el context del Dialog
-                                  SnackBar(
-                                    content: Text(
-                                      'Error al iniciar sesión: ${e.message}',
+                                if (mounted) {
+                                  scaffoldMessenger.showSnackBar(
+                                    // Usamos el context del Dialog
+                                    SnackBar(
+                                      content: Text(
+                                        'Error al iniciar sesión: ${e.message}',
+                                      ),
+                                      backgroundColor: Colors.red,
                                     ),
-                                    backgroundColor: Colors.red,
-                                  ),
-                                );
+                                  );
+                                }
                               }
                               // coverage:ignore-end
                             }
