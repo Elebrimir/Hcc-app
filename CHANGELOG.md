@@ -32,6 +32,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [2.0.0] - 2025-08-30
+
+feat: Agregar gestión de eventos con reglas de Firestore, modelo de evento y páginas relacionadas
+
 ## [1.0.2] - 2025-05-26
 
 feat: Agregar reglas de etiquetado para archivos Dart en el labeler
