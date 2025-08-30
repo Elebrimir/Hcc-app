@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/providers/event_provider.dart';
 import 'package:hcc_app/auth/auth_wrapper.dart';
 import 'package:hcc_app/firebase_options.dart';
 
@@ -15,7 +16,10 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   runApp(
     MultiProvider(
-      providers: [ChangeNotifierProvider(create: (_) => UserProvider())],
+      providers: [
+        ChangeNotifierProvider(create: (_) => UserProvider()),
+        ChangeNotifierProvider(create: (_) => EventProvider()),
+      ],
       child: const MyApp(),
     ),
   );

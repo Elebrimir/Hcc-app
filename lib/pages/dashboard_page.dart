@@ -9,6 +9,9 @@ import 'package:hcc_app/widgets/hcc_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
 import 'package:hcc_app/pages/team_page.dart';
+import 'package:hcc_app/pages/calendar_page.dart';
+import 'package:hcc_app/models/event_model.dart';
+import 'package:hcc_app/widgets/event_form_modal.dart';
 
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
@@ -33,12 +36,7 @@ class _DashboardPageState extends State<DashboardPage> {
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),
-      const Center(
-        child: Text(
-          "Calendari",
-          style: TextStyle(color: Colors.white, fontSize: 24),
-        ),
-      ),
+      const CalendarPage(),
       const UserListPage(),
       const TeamPage(),
       const ProfilePage(),
@@ -49,6 +47,20 @@ class _DashboardPageState extends State<DashboardPage> {
     setState(() {
       _selectedIndex = index;
     });
+  }
+
+  void _showEventFormModal(BuildContext context, {Event? event}) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.grey[850],
+      builder: (_) {
+        return ChangeNotifierProvider.value(
+          value: context.read<UserProvider>(),
+          child: EventFormModal(event: event),
+        );
+      },
+    );
   }
 
   @override
@@ -65,8 +77,17 @@ class _DashboardPageState extends State<DashboardPage> {
         isDashboard: true,
         formattedDate: _getFormattedDate(),
       ),
-      // body: IndexedStack(index: _selectedIndex, children: _pages),
       body: _pages[_selectedIndex],
+      floatingActionButton:
+          _selectedIndex == 1
+              ? FloatingActionButton(
+                onPressed: () {
+                  _showEventFormModal(context);
+                },
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                child: const Icon(Icons.add, color: Colors.white),
+              )
+              : null,
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,

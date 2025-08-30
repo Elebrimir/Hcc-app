@@ -90,7 +90,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   Future<void> _saveProfileChanges() async {
     if (!mounted) return;
-    
+
     final userProvider = Provider.of<UserProvider>(context, listen: false);
 
     final name = _nameController.text.trim();
