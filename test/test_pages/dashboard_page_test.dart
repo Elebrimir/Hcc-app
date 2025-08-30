@@ -7,9 +7,12 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/models/user_model.dart';
+import 'package:hcc_app/models/event_model.dart';
+import 'package:hcc_app/pages/calendar_page.dart';
 import 'package:hcc_app/pages/dashboard_page.dart';
 import 'package:hcc_app/pages/profile_page.dart';
 import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/providers/event_provider.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -62,8 +65,30 @@ class MockUserProviderManual extends ChangeNotifier implements UserProvider {
   Future<void> signOut() async {}
 }
 
+// Añade esta clase al principio de tu archivo de test
+class MockEventProvider extends ChangeNotifier implements EventProvider {
+  @override
+  bool get isLoading => false; // Decimos que no está cargando
+
+  @override
+  List<Event> get events => []; // Devolvemos una lista de eventos vacía
+
+  // No necesitamos implementar los otros métodos para este test
+  @override
+  Future<void> addEvent(
+    Map<String, dynamic> eventData,
+    String creatorUid,
+  ) async {}
+  @override
+  Future<void> updateEvent(
+    String eventId,
+    Map<String, dynamic> eventData,
+  ) async {}
+}
+
 void main() {
   late MockUserProviderManual mockUserProvider;
+  late MockEventProvider mockEventProvider;
 
   setUpAll(() {
     registerFallbackValue(File('dummy_path_for_fallback'));
@@ -72,12 +97,16 @@ void main() {
   setUp(() {
     resetMocktailState();
     mockUserProvider = MockUserProviderManual();
+    mockEventProvider = MockEventProvider();
   });
 
   Widget createTestableWidget() {
     return MaterialApp(
-      home: ChangeNotifierProvider<UserProvider>.value(
-        value: mockUserProvider,
+      home: MultiProvider(
+        providers: [
+          ChangeNotifierProvider<UserProvider>.value(value: mockUserProvider),
+          ChangeNotifierProvider<EventProvider>.value(value: mockEventProvider),
+        ],
         child: const DashboardPage(),
       ),
     );
@@ -100,7 +129,7 @@ void main() {
     await tester.tap(calendarIconFinder);
     await tester.pumpAndSettle();
 
-    expect(find.text("Calendari"), findsOneWidget);
+    expect(find.byType(CalendarPage), findsOneWidget);
     expect(find.text("Inici"), findsNothing);
   });
 

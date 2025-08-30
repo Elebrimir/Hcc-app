@@ -21,14 +21,11 @@ class _RegistrationPageState extends State<RegistrationPage> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _confirmPasswordController = TextEditingController();
-  
+
   void _showSnackBarSafe(String message, {Color? backgroundColor}) {
     if (mounted) {
       ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: backgroundColor,
-        ),
+        SnackBar(content: Text(message), backgroundColor: backgroundColor),
       );
     }
   }
@@ -67,17 +64,14 @@ class _RegistrationPageState extends State<RegistrationPage> {
             'Usuario registrado correctamente',
             backgroundColor: Colors.green,
           );
-          
+
           if (mounted) {
             navigator.pop();
           }
         }
       } on FirebaseAuthException catch (e) {
         debugPrint('Failed with error code: ${e.message}');
-        _showSnackBarSafe(
-          'Error: ${e.message}',
-          backgroundColor: Colors.red,
-        );
+        _showSnackBarSafe('Error: ${e.message}', backgroundColor: Colors.red);
       } catch (e) {
         debugPrint('Error desconocido al registrar o guardar datos: $e');
         _showSnackBarSafe(

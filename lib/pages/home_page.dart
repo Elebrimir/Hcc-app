@@ -46,7 +46,7 @@ class _HomePageState extends State<HomePage> {
                 child: Image.asset('assets/images/logo_club.png'),
               ),
               const SizedBox(height: 20.0),
-              if (user == null) // Si no hay usuario autenticado
+              if (user == null)
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
@@ -68,7 +68,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               const SizedBox(height: 20.0),
-              if (user == null) // Si no hay usuario autenticado
+              if (user == null)
                 ElevatedButton(
                   onPressed: () {
                     showDialog(
@@ -90,7 +90,7 @@ class _HomePageState extends State<HomePage> {
                   ),
                 ),
               const SizedBox(height: 20.0),
-              if (user != null) // Si hay usuario autenticado
+              if (user != null)
                 ElevatedButton(
                   onPressed: () {
                     Provider.of<UserProvider>(context, listen: false).signOut();

@@ -98,5 +98,22 @@ service cloud.firestore {
 
     } // Fin /teams/{teamId}
 
+    match /events/{eventId} {
+
+      // LEER (get y list): Permitido para cualquier usuario autenticado.
+      allow get, list: if request.auth != null;
+
+      // CREAR: Permitido si el usuario está autenticado Y el evento que se va a crear
+      // tiene el campo 'creatorUid' y coincide con el UID del usuario que hace la petición.
+      allow create: if request.auth != null && request.resource.data.creatorUid == request.auth.uid;
+
+      // ACTUALIZAR: Permitido si el usuario que hace la petición es el mismo que creó el evento.
+      // 'resource.data' es el estado del documento ANTES de la actualización.
+      allow update: if request.auth != null && request.auth.uid == resource.data.creatorUid;
+
+      // BORRAR: Permitido si el usuario que hace la petición es el mismo que creó el evento.
+      allow delete: if request.auth != null && request.auth.uid == resource.data.creatorUid;
+    }
+
   } // Fin /databases/{database}/documents
 } // Fin service cloud.firestore

@@ -17,14 +17,11 @@ class _LoginPageState extends State<LoginPage> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  
+
   void _showSnackBarSafe(String message, {Color? backgroundColor}) {
     if (mounted) {
       ScaffoldMessenger.of(widget.homePageContext).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: backgroundColor,
-        ),
+        SnackBar(content: Text(message), backgroundColor: backgroundColor),
       );
     }
   }
@@ -91,7 +88,9 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: () async {
                             if (_formKey.currentState!.validate()) {
                               final navigator = Navigator.of(context);
-                              final scaffoldMessenger = ScaffoldMessenger.of(context);
+                              final scaffoldMessenger = ScaffoldMessenger.of(
+                                context,
+                              );
                               try {
                                 await FirebaseAuth.instance
                                     .signInWithEmailAndPassword(
