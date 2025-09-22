@@ -34,7 +34,7 @@ class EventProvider extends ChangeNotifier {
           },
           onError: (error) {
             _isLoading = false;
-            print("Error al escuchar los eventos: $error");
+            debugPrint("Error al escuchar los eventos: $error");
             notifyListeners();
           },
         );
@@ -46,7 +46,7 @@ class EventProvider extends ChangeNotifier {
     super.dispose();
   }
 
-  Future<void> addEvent(
+  Future<String> addEvent(
     Map<String, dynamic> eventData,
     String creatorUid,
   ) async {
@@ -62,9 +62,11 @@ class EventProvider extends ChangeNotifier {
         ),
         'confirmedUsers': [],
       };
-      await _db.collection('events').add(eventMap);
+      final docRef = await _db.collection('events').add(eventMap);
+      return docRef.id;
     } catch (e) {
-      print("Error en afegir l'esdeveniment: $e");
+      debugPrint("Error en afegir l'esdeveniment: $e");
+      return '';
     }
   }
 
