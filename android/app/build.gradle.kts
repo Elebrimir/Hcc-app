@@ -15,12 +15,14 @@ android {
     // ndkVersion = flutter.ndkVersion
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_1_8
+        targetCompatibility = JavaVersion.VERSION_1_8
+        // Habilitar desugaring para las APIs de Java 8
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
-        jvmTarget = JavaVersion.VERSION_11.toString()
+        jvmTarget = JavaVersion.VERSION_1_8.toString()
     }
 
     defaultConfig {
@@ -28,7 +30,7 @@ android {
         applicationId = "com.example.hcc_app"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = 23
+        minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
@@ -45,4 +47,11 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    // ... tus otras dependencias
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
+    // Dependencia para habilitar desugaring
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
 }

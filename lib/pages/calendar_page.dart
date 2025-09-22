@@ -7,6 +7,7 @@ import 'package:hcc_app/models/event_model.dart';
 import 'package:hcc_app/providers/event_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
+import 'package:hcc_app/widgets/event_form_modal.dart';
 
 class CalendarPage extends StatefulWidget {
   const CalendarPage({super.key});
@@ -18,6 +19,7 @@ class CalendarPage extends StatefulWidget {
 class _CalendarPageState extends State<CalendarPage> {
   DateTime _selectedDay = DateTime.now();
   DateTime _focusedDay = DateTime.now();
+  Map<DateTime, List<Event>> _groupedEvents = {};
 
   Map<DateTime, List<Event>> _groupEvents(List<Event> events) {
     Map<DateTime, List<Event>> data = {};
@@ -34,16 +36,22 @@ class _CalendarPageState extends State<CalendarPage> {
   }
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final events = Provider.of<EventProvider>(context).events;
+    _groupedEvents = _groupEvents(events);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final eventProvider = context.watch<EventProvider>();
+    final eventProvider = context.read<EventProvider>();
 
     if (eventProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
 
-    final groupedEvents = _groupEvents(eventProvider.events);
     final eventsForSelectedDay =
-        groupedEvents[DateTime.utc(
+        _groupedEvents[DateTime.utc(
           _selectedDay.year,
           _selectedDay.month,
           _selectedDay.day,
@@ -64,7 +72,7 @@ class _CalendarPageState extends State<CalendarPage> {
             });
           },
           eventLoader: (day) {
-            return groupedEvents[DateTime.utc(day.year, day.month, day.day)] ??
+            return _groupedEvents[DateTime.utc(day.year, day.month, day.day)] ??
                 [];
           },
           headerStyle: const HeaderStyle(
@@ -84,7 +92,7 @@ class _CalendarPageState extends State<CalendarPage> {
               shape: BoxShape.circle,
             ),
             selectedDecoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary,
+              color: Theme.of(context).colorScheme.tertiary,
               shape: BoxShape.circle,
             ),
             markerDecoration: BoxDecoration(
@@ -124,6 +132,9 @@ class _CalendarPageState extends State<CalendarPage> {
                           "${event.startTime.hour.toString().padLeft(2, '0')}:${event.startTime.minute.toString().padLeft(2, '0')}",
                           style: const TextStyle(color: Colors.white70),
                         ),
+                        onTap: () {
+                          _editEvent(event);
+                        },
                       ),
                     ),
                   ],
@@ -133,6 +144,18 @@ class _CalendarPageState extends State<CalendarPage> {
           ),
         ),
       ],
+    );
+  }
+
+  void _editEvent(Event event) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.grey[800],
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => EventFormModal(event: event),
     );
   }
 }

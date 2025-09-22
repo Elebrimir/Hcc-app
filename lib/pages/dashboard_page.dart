@@ -53,7 +53,7 @@ class _DashboardPageState extends State<DashboardPage> {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
-      backgroundColor: Colors.grey[850],
+      backgroundColor: Colors.grey[800],
       builder: (_) {
         return ChangeNotifierProvider.value(
           value: context.read<UserProvider>(),
@@ -84,7 +84,7 @@ class _DashboardPageState extends State<DashboardPage> {
                 onPressed: () {
                   _showEventFormModal(context);
                 },
-                backgroundColor: Theme.of(context).colorScheme.primary,
+                backgroundColor: Theme.of(context).colorScheme.tertiary,
                 child: const Icon(Icons.add, color: Colors.white),
               )
               : null,
@@ -93,7 +93,7 @@ class _DashboardPageState extends State<DashboardPage> {
         onTap: _onItemTapped,
         type: BottomNavigationBarType.fixed,
         backgroundColor: Colors.grey[900],
-        selectedItemColor: Theme.of(context).colorScheme.primary,
+        selectedItemColor: Theme.of(context).colorScheme.tertiary,
         unselectedItemColor: Colors.grey[500],
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),

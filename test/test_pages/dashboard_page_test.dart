@@ -13,6 +13,7 @@ import 'package:hcc_app/pages/dashboard_page.dart';
 import 'package:hcc_app/pages/profile_page.dart';
 import 'package:hcc_app/providers/user_provider.dart';
 import 'package:hcc_app/providers/event_provider.dart';
+import 'package:hcc_app/widgets/event_form_modal.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -65,20 +66,24 @@ class MockUserProviderManual extends ChangeNotifier implements UserProvider {
   Future<void> signOut() async {}
 }
 
-// Añade esta clase al principio de tu archivo de test
 class MockEventProvider extends ChangeNotifier implements EventProvider {
+  final List<Event> _mockedEvents;
+
+  MockEventProvider(this._mockedEvents);
   @override
-  bool get isLoading => false; // Decimos que no está cargando
+  bool get isLoading => false;
 
   @override
-  List<Event> get events => []; // Devolvemos una lista de eventos vacía
+  List<Event> get events => _mockedEvents;
 
-  // No necesitamos implementar los otros métodos para este test
   @override
-  Future<void> addEvent(
+  Future<String> addEvent(
     Map<String, dynamic> eventData,
     String creatorUid,
-  ) async {}
+  ) async {
+    return 'mock_event_id';
+  }
+
   @override
   Future<void> updateEvent(
     String eventId,
@@ -90,6 +95,36 @@ void main() {
   late MockUserProviderManual mockUserProvider;
   late MockEventProvider mockEventProvider;
 
+  final mockEvents = [
+    Event(
+      id: '1',
+      title: "Entrenamiento Mañana",
+      description: "Fuerza",
+      startTime: DateTime.utc(2025, 09, 15, 10, 0),
+      endTime: DateTime.utc(2025, 09, 15, 11, 0),
+      confirmedUsers: [],
+      location: "Gimnasio",
+    ),
+    Event(
+      id: '2',
+      title: "Partido Amistoso",
+      description: "Contra B",
+      startTime: DateTime.utc(2025, 09, 15, 18, 0),
+      endTime: DateTime.utc(2025, 09, 15, 20, 0),
+      confirmedUsers: [],
+      location: "Estadio Central",
+    ),
+    Event(
+      id: '3',
+      title: "Reunión Equipo",
+      description: "Planificación",
+      startTime: DateTime.utc(2025, 09, 15, 21, 0),
+      endTime: DateTime.utc(2025, 09, 15, 22, 0),
+      confirmedUsers: [],
+      location: "Sala de Juntas",
+    ),
+  ];
+
   setUpAll(() {
     registerFallbackValue(File('dummy_path_for_fallback'));
   });
@@ -97,7 +132,7 @@ void main() {
   setUp(() {
     resetMocktailState();
     mockUserProvider = MockUserProviderManual();
-    mockEventProvider = MockEventProvider();
+    mockEventProvider = MockEventProvider(mockEvents);
   });
 
   Widget createTestableWidget() {
@@ -131,6 +166,36 @@ void main() {
 
     expect(find.byType(CalendarPage), findsOneWidget);
     expect(find.text("Inici"), findsNothing);
+  });
+
+  testWidgets('El calendario muestra y filtra eventos al seleccionar un día', (
+    tester,
+  ) async {
+    await tester.pumpWidget(createTestableWidget());
+
+    await tester.tap(find.byIcon(Icons.calendar_today));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListTile), findsNothing);
+
+    await tester.tap(find.text('15'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListTile), findsNWidgets(1));
+    expect(find.text('Entrenamiento Mañana'), findsOneWidget);
+
+    await tester.tap(find.text('18'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(ListTile), findsNothing);
+
+    await tester.tap(find.text('15'));
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('Entrenamiento Mañana'));
+    await tester.pumpAndSettle();
+
+    expect(find.byType(EventFormModal), findsOneWidget);
   });
 
   testWidgets('Navega a la tercera pestaña y muestra ProfilePage', (

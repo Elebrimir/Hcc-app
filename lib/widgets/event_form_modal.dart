@@ -8,6 +8,7 @@ import 'package:hcc_app/providers/event_provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:hcc_app/services/notification_service.dart';
 
 class EventFormModal extends StatefulWidget {
   final Event? event; // Si es null, estamos creando. Si no, editando.
@@ -57,14 +58,14 @@ class _EventFormModalState extends State<EventFormModal> {
     }
   }
 
-  void _saveForm() {
+  void _saveForm() async {
     if (_formKey.currentState!.validate()) {
       final eventProvider = context.read<EventProvider>();
       final userProvider = context.read<UserProvider>();
       final userId = userProvider.firebaseUser?.uid;
 
       if (userId == null) {
-        print("Error: Usuari no autenticat");
+        debugPrint("Error: Usuari no autenticat");
         return;
       }
       final eventData = {
@@ -75,12 +76,35 @@ class _EventFormModalState extends State<EventFormModal> {
       };
 
       if (widget.event == null) {
-        eventProvider.addEvent(eventData, userId);
+        final newEventId = await eventProvider.addEvent(eventData, userId);
+        final newEvent = Event(
+          id: newEventId,
+          title: eventData['title'] as String,
+          startTime: eventData['startTime'] as DateTime,
+          endTime: eventData['endTime'] as DateTime,
+          description: eventData['description'] as String,
+          confirmedUsers: [],
+        );
+        await NotificationService.scheduleEventNotification(newEvent);
+        debugPrint("Notificación programada para el nuevo evento");
       } else {
-        eventProvider.updateEvent(widget.event!.id, eventData);
+        await eventProvider.updateEvent(widget.event!.id, eventData).id ??
+            hashCode;
+        final updatedEvent = Event(
+          id: widget.event!.id,
+          title: eventData['title'] as String,
+          startTime: eventData['startTime'] as DateTime,
+          endTime: eventData['endTime'] as DateTime,
+          description: eventData['description'] as String,
+          confirmedUsers: [],
+        );
+        await NotificationService.cancelNotification(widget.event!.id);
+        await NotificationService.scheduleEventNotification(updatedEvent);
+        debugPrint("Notificación actualizada para el evento editado");
       }
-
-      Navigator.of(context).pop(); // Cierra el modal
+      if (mounted) {
+        Navigator.of(context).pop();
+      }
     }
   }
 
@@ -129,6 +153,10 @@ class _EventFormModalState extends State<EventFormModal> {
                 ),
                 TextButton(
                   onPressed: _selectDate,
+                  style: TextButton.styleFrom(
+                    foregroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                  ),
                   child: const Text('Canviar'),
                 ),
               ],
@@ -144,4 +172,8 @@ class _EventFormModalState extends State<EventFormModal> {
       ),
     );
   }
+}
+
+extension on Future<void> {
+  Future get id async => null;
 }
