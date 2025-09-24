@@ -34,6 +34,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [2.0.2] - 2025-09-24
+
+feat: Agregar soporte para notificaciones locales y mejorar la gestión de eventos
+
 ## [2.0.1] - 2025-09-08
 
 feat: Actualizar CHANGELOG y eliminar comentarios de cobertura en varios archivos
