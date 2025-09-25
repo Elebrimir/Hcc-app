@@ -1,0 +1,9 @@
+-keep class com.dexterous.flutterlocalnotifications.** { *; }
+-keep class com.google.firebase.** { *; }
+-keep class com.google.android.gms.** { *; }
+-keepnames class com.google.firebase.database.DataSnapshot
+-keepnames class com.google.firebase.firestore.DocumentSnapshot
+-keep class com.google.android.gms.auth.** { *; }
+-keep class com.facebook.** { *; }
+-keep class com.example.hcc_app.models.** { *; }
+-keep public class * extends java.lang.Enum
