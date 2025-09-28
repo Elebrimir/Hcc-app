@@ -30,13 +30,10 @@ class NotificationService {
 
   // 1. Inicializa el plugin de notificaciones
   static Future<void> init() async {
-    // Inicializar zona horaria para notificaciones programadas
     tz.initializeTimeZones();
 
     const AndroidInitializationSettings initializationSettingsAndroid =
-        AndroidInitializationSettings(
-          'ic_notification', // Corregido el nombre del icono
-        );
+        AndroidInitializationSettings('ic_notification');
 
     const DarwinInitializationSettings initializationSettingsIOS =
         DarwinInitializationSettings();
@@ -52,19 +49,15 @@ class NotificationService {
       onDidReceiveNotificationResponse: (NotificationResponse response) {
         if (response.payload != null) {
           debugPrint('Notificación recibida con payload: ${response.payload}');
-          // Manejar la carga útil de la notificación si es necesario
         }
-        // Manejar la respuesta a la notificación si es necesario
       },
     );
   }
 
-  // 2. Programa la notificación para un evento
   static Future<void> scheduleEventNotification(
     Event event, {
     Duration reminderTime = const Duration(hours: 1),
   }) async {
-    // Convertir el ID del evento a un entero para el ID de la notificación
     final int notificationId = event.id.hashCode;
 
     final tz.TZDateTime scheduledTime = tz.TZDateTime.from(
@@ -76,7 +69,7 @@ class NotificationService {
         AndroidNotificationDetails(
           'event_channel_id',
           'Event Notifications',
-          channelDescription: 'Notificaciones para eventos agendados.',
+          channelDescription: 'Notificaciones para eventos HCC.',
           importance: Importance.max,
           priority: Priority.high,
         );
@@ -92,7 +85,7 @@ class NotificationService {
       await _flutterLocalNotificationsPlugin.zonedSchedule(
         notificationId,
         event.title,
-        'Tu evento está a punto de empezar!',
+        'Evento de HCC está a punto de empezar!',
         scheduledTime,
         platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
@@ -106,7 +99,7 @@ class NotificationService {
         await _flutterLocalNotificationsPlugin.zonedSchedule(
           notificationId,
           event.title,
-          'Tu evento está a punto de empezar! (Recordatorio no exacto)',
+          'Evento de HCC está a punto de empezar! (Recordatorio no exacto)',
           scheduledTime,
           platformDetails,
           androidScheduleMode: AndroidScheduleMode.inexact,
