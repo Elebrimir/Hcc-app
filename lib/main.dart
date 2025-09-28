@@ -13,13 +13,9 @@ import 'package:hcc_app/firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  debugPrint('App initialization started'); // Mensaje de depuración
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
-  debugPrint('Firebase initialized successfully'); // Mensaje de depuración
   await NotificationService.init();
-  debugPrint(
-    'Notification service initialized successfully',
-  ); // Mensaje de depuración
+  await NotificationService.requestPermissions();
   runApp(
     MultiProvider(
       providers: [
