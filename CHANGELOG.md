@@ -36,6 +36,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [2.0.4] - 2025-09-29
+
+feat: Corregir la referencia del mensaje de commit en la actualización del cuerpo de la PR
+
 ## [2.0.3] - 2025-09-29
 
 COMMIT_MSG_ENV
