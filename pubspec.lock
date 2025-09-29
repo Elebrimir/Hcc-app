@@ -341,10 +341,10 @@ packages:
     dependency: "direct dev"
     description:
       name: firebase_auth_mocks
-      sha256: "48fcc9e3bef9b3ae6d9e2b7652bcb91965b68d8b0042814c45686086476ed967"
+      sha256: ee1076150ea51d181ae24d5f8e2686a1926b7cc54e25c0deaa8ac58705025551
       url: "https://pub.dev"
     source: hosted
-    version: "0.15.0"
+    version: "0.15.1"
   firebase_auth_platform_interface:
     dependency: transitive
     description:
