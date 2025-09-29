@@ -80,10 +80,12 @@ class EventProvider extends ChangeNotifier {
         'startTime': Timestamp.fromDate(eventData['startTime']),
         'endTime': Timestamp.fromDate(eventData['endTime']),
         'description': eventData['description'],
+        'location': eventData['location'],
+        'confirmedUsers': eventData['confirmedUsers'] ?? [],
       };
       await _db.collection('events').doc(eventId).update(eventMap);
     } catch (e) {
-      print("Error en actualitzar l'esdeveniment: $e");
+      debugPrint("Error en actualitzar l'esdeveniment: $e");
     }
   }
 }

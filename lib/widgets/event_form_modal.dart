@@ -23,6 +23,7 @@ class _EventFormModalState extends State<EventFormModal> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
   late DateTime _startDate;
+  late TextEditingController _locationController;
 
   @override
   void initState() {
@@ -30,6 +31,9 @@ class _EventFormModalState extends State<EventFormModal> {
     // Si estamos editando, rellenamos los campos con los datos del evento
     _titleController = TextEditingController(text: widget.event?.title ?? '');
     _startDate = widget.event?.startTime ?? DateTime.now();
+    _locationController = TextEditingController(
+      text: widget.event?.location ?? '',
+    );
   }
 
   Future<void> _selectDate() async {
@@ -102,9 +106,8 @@ class _EventFormModalState extends State<EventFormModal> {
         await NotificationService.scheduleEventNotification(updatedEvent);
         debugPrint("Notificación actualizada para el evento editado");
       }
-      if (mounted) {
-        Navigator.of(context).pop();
-      }
+      if (!mounted) return;
+      Navigator.of(context).pop();
     }
   }
 
@@ -143,11 +146,20 @@ class _EventFormModalState extends State<EventFormModal> {
                       value!.isEmpty ? 'El títol no pot estar buit' : null,
             ),
             const SizedBox(height: 20),
+            TextFormField(
+              controller: _locationController,
+              style: const TextStyle(color: Colors.white),
+              decoration: const InputDecoration(
+                labelText: 'Lloc de l\'esdeveniment',
+                labelStyle: TextStyle(color: Colors.grey),
+              ),
+            ),
+            const SizedBox(height: 20),
             Row(
               children: [
                 Expanded(
                   child: Text(
-                    'Data: ${DateFormat('dd/MM/yyyy HH:mm').format(_startDate)}',
+                    'Data Inici: ${DateFormat('dd/MM/yyyy HH:mm').format(_startDate)}',
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
@@ -158,6 +170,17 @@ class _EventFormModalState extends State<EventFormModal> {
                         Theme.of(context).colorScheme.primaryContainer,
                   ),
                   child: const Text('Canviar'),
+                ),
+              ],
+            ),
+            const SizedBox(height: 20),
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Data Fi: ${DateFormat('dd/MM/yyyy HH:mm').format(_startDate.add(const Duration(hours: 1)))}',
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
               ],
             ),

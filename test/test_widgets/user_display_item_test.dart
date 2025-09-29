@@ -6,8 +6,13 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/models/user_model.dart';
 import 'package:hcc_app/widgets/user_display_item.dart';
+import 'package:hcc_app/providers/user_provider.dart';
+import 'package:mockito/mockito.dart';
+import 'package:provider/provider.dart';
+import '../mocks.mocks.dart';
 
 void main() {
+  late MockUserProvider mockUserProvider;
   final userCompleto = UserModel(
     name: 'Obi-Wan',
     lastname: 'Kenobi',
@@ -16,11 +21,29 @@ void main() {
     image: null,
   );
 
+  setUp(() {
+    mockUserProvider = MockUserProvider();
+  });
+
   testWidgets('Muestra correctamente los datos del usuario admin', (
     WidgetTester tester,
   ) async {
+    when(mockUserProvider.userModel).thenReturn(
+      UserModel(
+        name: 'Admin',
+        lastname: 'Test',
+        email: 'admin@test.com',
+        role: 'Admin',
+      ),
+    );
+
     await tester.pumpWidget(
-      MaterialApp(home: Scaffold(body: UserDisplayItem(user: userCompleto))),
+      ChangeNotifierProvider<UserProvider>.value(
+        value: mockUserProvider,
+        child: MaterialApp(
+          home: Scaffold(body: UserDisplayItem(user: userCompleto)),
+        ),
+      ),
     );
     expect(find.text('Obi-Wan Kenobi'), findsOneWidget);
     expect(find.text('Rol: Admin'), findsOneWidget);
