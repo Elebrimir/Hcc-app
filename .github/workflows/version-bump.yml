@@ -115,10 +115,12 @@ jobs:
           sed -i "s/^version: .*/version: ${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}/" pubspec.yaml
           cat pubspec.yaml | grep version
 
-      - name: Update CHANGELOG.md
+      - name: Update CHANGELOG.mdç
+        env:
+          COMMIT_MSG_ENV: ${{ steps.bump-type.outputs.commit_message }}
         run: |
           DATE=$(date +%Y-%m-%d)
-          RAW_COMMIT_MSG="${{ steps.bump-type.outputs.commit_message }}"
+          RAW_COMMIT_MSG="COMMIT_MSG_ENV"
           # 1. Procesar el mensaje del commit: Convertir '\n' literal en saltos de línea reales
           #    Usamos printf '%b' que interpreta las secuencias de escape como \n, \t, etc.
           COMMIT_MSG=$(printf '%b' "$RAW_COMMIT_MSG")
