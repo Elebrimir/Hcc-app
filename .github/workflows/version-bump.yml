@@ -120,7 +120,7 @@ jobs:
           COMMIT_MSG_ENV: ${{ steps.bump-type.outputs.commit_message }}
         run: |
           DATE=$(date +%Y-%m-%d)
-          RAW_COMMIT_MSG="COMMIT_MSG_ENV"
+          RAW_COMMIT_MSG="$COMMIT_MSG_ENV"
           # 1. Procesar el mensaje del commit: Convertir '\n' literal en saltos de línea reales
           #    Usamos printf '%b' que interpreta las secuencias de escape como \n, \t, etc.
           COMMIT_MSG=$(printf '%b' "$RAW_COMMIT_MSG")
@@ -158,6 +158,7 @@ jobs:
       - name: Create Pull Request for Version Bump
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_BODY_ENV : ${{ steps.bump-type.outputs.commit_message }}
         run: |
           # Definir variables útiles
           NEW_VERSION_FULL="${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}"
@@ -165,8 +166,7 @@ jobs:
           COMMIT_MSG="Bump version to ${NEW_VERSION_FULL}" # Mensaje de commit
           PR_TITLE="${COMMIT_MSG}" # Título para la PR
           # Cuerpo para la PR (usaremos el mensaje procesado del commit original)
-          RAW_COMMIT_MSG="${{ steps.bump-type.outputs.commit_message }}"
-          PR_BODY=$(printf '%b' "$RAW_COMMIT_MSG")
+          PR_BODY=$(printf '%b' "$PR_BODY_ENV")
           echo "Configurando Git..."
           git config --local user.email "action@github.com"
           # Puedes poner un nombre más descriptivo si quieres
