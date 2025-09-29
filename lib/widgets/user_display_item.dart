@@ -3,7 +3,9 @@
 // license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:hcc_app/models/user_model.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 
 class UserDisplayItem extends StatelessWidget {
   final UserModel user;
@@ -13,6 +15,8 @@ class UserDisplayItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final loggedInUser = userProvider.userModel;
     return Card(
       margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
       elevation: 3.0,
@@ -73,7 +77,7 @@ class UserDisplayItem extends StatelessWidget {
                         ],
                       ),
                     // Rol
-                    if (user.role == 'Admin')
+                    if (loggedInUser?.role == 'Admin')
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [

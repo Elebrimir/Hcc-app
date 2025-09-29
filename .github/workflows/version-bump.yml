@@ -115,7 +115,7 @@ jobs:
           sed -i "s/^version: .*/version: ${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}/" pubspec.yaml
           cat pubspec.yaml | grep version
 
-      - name: Update CHANGELOG.mdç
+      - name: Update CHANGELOG.md
         env:
           COMMIT_MSG_ENV: ${{ steps.bump-type.outputs.commit_message }}
         run: |
