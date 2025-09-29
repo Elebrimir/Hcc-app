@@ -35,6 +35,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [2.0.3] - 2025-09-29
+
+COMMIT_MSG_ENV
+
 ## [2.0.2] - 2025-09-24
 
 feat: Agregar soporte para notificaciones locales y mejorar la gestión de eventos
