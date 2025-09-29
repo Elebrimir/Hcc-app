@@ -5,6 +5,7 @@
 import 'package:flutter/material.dart';
 import 'package:hcc_app/models/event_model.dart';
 import 'package:hcc_app/providers/event_provider.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:table_calendar/table_calendar.dart';
 import 'package:hcc_app/widgets/event_form_modal.dart';
@@ -45,6 +46,8 @@ class _CalendarPageState extends State<CalendarPage> {
   @override
   Widget build(BuildContext context) {
     final eventProvider = context.read<EventProvider>();
+    final userProvider = Provider.of<UserProvider>(context);
+    final loggedInUser = userProvider.userModel;
 
     if (eventProvider.isLoading) {
       return const Center(child: CircularProgressIndicator());
@@ -133,7 +136,10 @@ class _CalendarPageState extends State<CalendarPage> {
                           style: const TextStyle(color: Colors.white70),
                         ),
                         onTap: () {
-                          _editEvent(event);
+                          if (loggedInUser?.role == 'Admin' ||
+                              loggedInUser?.role == 'Coach') {
+                            _editEvent(event);
+                          }
                         },
                       ),
                     ),

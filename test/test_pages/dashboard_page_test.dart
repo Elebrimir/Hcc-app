@@ -30,7 +30,7 @@ class MockUserProviderManual extends ChangeNotifier implements UserProvider {
         email: 'mock@example.com',
         name: 'MockName',
         lastname: 'MockLastName',
-        role: 'mockRole',
+        role: 'Admin',
         image: '',
         createdAt: Timestamp.now(),
       ) {
