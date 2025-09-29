@@ -17,7 +17,7 @@ on:
         type: choice
         options:
           - android
-          - ios
+          # - ios Comentado temporalmente para evitar builds fallidos por falta de certificados
 
 jobs:
   # Job para construir la aplicación Android
