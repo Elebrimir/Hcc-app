@@ -3,6 +3,8 @@
 // license that can be found in the LICENSE file.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/services/notification_service.dart';
@@ -16,6 +18,7 @@ Future<void> main() async {
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
   await NotificationService.init();
   await NotificationService.requestPermissions();
+  await initializeDateFormatting('ca_ES', null);
   runApp(
     MultiProvider(
       providers: [
@@ -35,11 +38,22 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'HCC App',
       theme: ThemeData(
+        colorScheme: ColorScheme.fromSeed(seedColor: Colors.red),
+        useMaterial3: true,
         primarySwatch: Colors.red,
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
       home: const AuthWrapper(),
       debugShowCheckedModeBanner: false,
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
+      supportedLocales: const [
+        Locale('ca', 'ES'), // Catalan
+      ],
+      locale: const Locale('ca', 'ES'),
     );
   }
 }

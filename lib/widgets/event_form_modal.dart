@@ -6,6 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:hcc_app/models/event_model.dart';
 import 'package:hcc_app/providers/event_provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/widgets/recurrence_rule.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/services/notification_service.dart';
@@ -22,21 +23,30 @@ class EventFormModal extends StatefulWidget {
 class _EventFormModalState extends State<EventFormModal> {
   final _formKey = GlobalKey<FormState>();
   late TextEditingController _titleController;
-  late DateTime _startDate;
   late TextEditingController _locationController;
+  late TextEditingController _descriptionController;
+  late DateTime _startDate;
+  late DateTime _endDate;
+  RecurrenceRule? _recurrenceRule;
+  DateTime? _recurrenceEndDate;
 
   @override
   void initState() {
     super.initState();
     // Si estamos editando, rellenamos los campos con los datos del evento
     _titleController = TextEditingController(text: widget.event?.title ?? '');
-    _startDate = widget.event?.startTime ?? DateTime.now();
     _locationController = TextEditingController(
       text: widget.event?.location ?? '',
     );
+    _descriptionController = TextEditingController(
+      text: widget.event?.description ?? '',
+    );
+    _startDate = widget.event?.startTime ?? DateTime.now();
+    _endDate =
+        widget.event?.endTime ?? _startDate.add(const Duration(hours: 1));
   }
 
-  Future<void> _selectDate() async {
+  Future<void> _selectStartDate() async {
     final pickedDate = await showDatePicker(
       context: context,
       initialDate: _startDate,
@@ -57,7 +67,38 @@ class _EventFormModalState extends State<EventFormModal> {
             pickedTime.hour,
             pickedTime.minute,
           );
+          final duration = _endDate.difference(_startDate);
+          _endDate = _startDate.add(duration);
         });
+      }
+    }
+  }
+
+  Future<void> _selectEndDate() async {
+    final pickedDate = await showDatePicker(
+      context: context,
+      initialDate: _endDate,
+      firstDate: DateTime(2020),
+      lastDate: DateTime(2030),
+    );
+    if (pickedDate != null) {
+      final pickedTime = await showTimePicker(
+        context: context,
+        initialTime: TimeOfDay.fromDateTime(_endDate),
+      );
+      if (pickedTime != null) {
+        setState(() {
+          _endDate = DateTime(
+            pickedDate.year,
+            pickedDate.month,
+            pickedDate.day,
+            pickedTime.hour,
+            pickedTime.minute,
+          );
+        });
+        if (_endDate.isBefore(_startDate)) {
+          _endDate = _startDate.add(const Duration(hours: 1));
+        }
       }
     }
   }
@@ -78,6 +119,19 @@ class _EventFormModalState extends State<EventFormModal> {
         'endTime': _startDate.add(const Duration(hours: 1)),
         'description': '',
       };
+
+      final baseEvent = Event(
+        id: widget.event?.id ?? '',
+        title: _titleController.text,
+        startTime: _startDate,
+        endTime: _endDate,
+        description: _descriptionController.text,
+        location: _locationController.text,
+        confirmedUsers: widget.event?.confirmedUsers ?? [],
+        recurrenceRule: _recurrenceRule,
+        recurrenceEndDate: _recurrenceEndDate,
+        excludedDates: const [],
+      );
 
       if (widget.event == null) {
         final newEventId = await eventProvider.addEvent(eventData, userId);
@@ -145,7 +199,7 @@ class _EventFormModalState extends State<EventFormModal> {
                   (value) =>
                       value!.isEmpty ? 'El títol no pot estar buit' : null,
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             TextFormField(
               controller: _locationController,
               style: const TextStyle(color: Colors.white),
@@ -154,7 +208,7 @@ class _EventFormModalState extends State<EventFormModal> {
                 labelStyle: TextStyle(color: Colors.grey),
               ),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
             Row(
               children: [
                 Expanded(
@@ -164,16 +218,19 @@ class _EventFormModalState extends State<EventFormModal> {
                   ),
                 ),
                 TextButton(
-                  onPressed: _selectDate,
+                  onPressed: _selectStartDate,
                   style: TextButton.styleFrom(
                     foregroundColor:
                         Theme.of(context).colorScheme.primaryContainer,
                   ),
-                  child: const Text('Canviar'),
+                  child: const Text(
+                    'Canviar',
+                    style: TextStyle(color: Colors.cyan),
+                  ),
                 ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 5),
             Row(
               children: [
                 Expanded(
@@ -182,9 +239,28 @@ class _EventFormModalState extends State<EventFormModal> {
                     style: const TextStyle(color: Colors.white),
                   ),
                 ),
+                TextButton(
+                  onPressed: _selectStartDate,
+                  style: TextButton.styleFrom(
+                    foregroundColor:
+                        Theme.of(context).colorScheme.primaryContainer,
+                  ),
+                  child: const Text(
+                    'Canviar',
+                    style: TextStyle(color: Colors.cyan),
+                  ),
+                ),
               ],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 10),
+            RecurrenceSelector(
+              onRecurrenceChanged: (rule) {
+                setState(() {
+                  _recurrenceRule = rule;
+                });
+              },
+            ),
+            const SizedBox(height: 10),
             ElevatedButton(
               onPressed: _saveForm,
               child: Text(widget.event == null ? 'Crear' : 'Guardar Canvis'),

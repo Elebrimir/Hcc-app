@@ -64,9 +64,21 @@ class _CalendarPageState extends State<CalendarPage> {
     return Column(
       children: [
         TableCalendar<Event>(
+          focusedDay: _focusedDay,
           firstDay: DateTime.utc(2020, 1, 1),
           lastDay: DateTime.utc(2030, 12, 31),
-          focusedDay: _focusedDay,
+          locale: 'ca_ES',
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          availableCalendarFormats:
+              Map()..addAll(const {
+                CalendarFormat.month: 'Mes',
+                CalendarFormat.twoWeeks: '2 Setmanes',
+                CalendarFormat.week: 'Setmana',
+              }),
+          calendarFormat: CalendarFormat.month,
+          rowHeight: 43,
+          daysOfWeekHeight: 30,
+          weekendDays: const [DateTime.saturday, DateTime.sunday],
           selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
           onDaySelected: (selectedDay, focusedDay) {
             setState(() {
