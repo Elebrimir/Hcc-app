@@ -31,6 +31,22 @@ class Event {
 
   factory Event.fromFirestore(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     final data = snapshot.data()!;
+
+    RecurrenceRule? recurrenceRule;
+    if (data['recurrenceRule'] != null) {
+      final ruleData = data['recurrenceRule'] as Map<String, dynamic>;
+      recurrenceRule = RecurrenceRule(
+        frequency: RecurrenceFrequency.values[ruleData['frequency']],
+        interval: ruleData['interval'] ?? 1,
+        daysOfWeek:
+            ruleData['daysOfWeek'] != null
+                ? List<int>.from(ruleData['daysOfWeek'])
+                : null,
+        dayOfMonth: ruleData['dayOfMonth'],
+        weekOfMonth: ruleData['weekOfMonth'],
+      );
+    }
+
     return Event(
       id: snapshot.id,
       title: data['title'],
@@ -39,6 +55,17 @@ class Event {
       endTime: (data['endTime'] as Timestamp).toDate(),
       location: data['location'],
       confirmedUsers: List<String>.from(data['confirmedUsers'] ?? []),
+      recurrenceRule: recurrenceRule,
+      recurrenceEndDate:
+          data['recurrenceEndDate'] != null
+              ? (data['recurrenceEndDate'] as Timestamp).toDate()
+              : null,
+      excludedDates:
+          data['excludedDates'] != null
+              ? (data['excludedDates'] as List)
+                  .map((date) => (date as Timestamp).toDate())
+                  .toList()
+              : [],
     );
   }
 
@@ -50,7 +77,40 @@ class Event {
       'endTime': Timestamp.fromDate(endTime),
       'location': location,
       'confirmedUsers': confirmedUsers,
+      'recurrenceRule': recurrenceRule?.toJson(),
+      'recurrenceEndDate':
+          recurrenceEndDate != null
+              ? Timestamp.fromDate(recurrenceEndDate!)
+              : null,
+      'excludedDates':
+          excludedDates!.map((date) => Timestamp.fromDate(date)).toList(),
     };
+  }
+
+  Event copyWith({
+    String? id,
+    String? title,
+    String? description,
+    DateTime? startTime,
+    DateTime? endTime,
+    String? location,
+    List<String>? confirmedUsers,
+    RecurrenceRule? recurrenceRule,
+    DateTime? recurrenceEndDate,
+    List<DateTime>? excludedDates,
+  }) {
+    return Event(
+      id: id ?? this.id,
+      title: title ?? this.title,
+      description: description ?? this.description,
+      startTime: startTime ?? this.startTime,
+      endTime: endTime ?? this.endTime,
+      location: location ?? this.location,
+      confirmedUsers: confirmedUsers ?? this.confirmedUsers,
+      recurrenceRule: recurrenceRule ?? this.recurrenceRule,
+      recurrenceEndDate: recurrenceEndDate ?? this.recurrenceEndDate,
+      excludedDates: excludedDates ?? this.excludedDates,
+    );
   }
 }
 
@@ -68,6 +128,16 @@ class RecurrenceRule {
     this.dayOfMonth,
     this.weekOfMonth,
   });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'frequency': frequency.index,
+      'interval': interval,
+      'daysOfWeek': daysOfWeek,
+      'dayOfMonth': dayOfMonth,
+      'weekOfMonth': weekOfMonth,
+    };
+  }
 }
 
 enum RecurrenceFrequency { daily, weekly, monthly, yearly }
@@ -80,7 +150,9 @@ extension EventRecurrence on Event {
     var currentStart = startTime;
     var count = 0;
 
-    while (count < maxCount && (currentStart.isBefore(recurrenceEndDate!))) {
+    while (count < maxCount &&
+        (recurrenceEndDate == null ||
+            currentStart.isBefore(recurrenceEndDate!))) {
       if (!excludedDates!.any(
         (excluded) => _isSameDay(excluded, currentStart),
       )) {
@@ -93,6 +165,9 @@ extension EventRecurrence on Event {
             startTime: currentStart,
             endTime: endTime.add(currentStart.difference(startTime)),
             confirmedUsers: confirmedUsers,
+            recurrenceRule: recurrenceRule,
+            recurrenceEndDate: recurrenceEndDate,
+            excludedDates: excludedDates,
           ),
         );
         count++;
