@@ -40,7 +40,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   provider: ^6.1.4
   image_picker: ^1.2.0
-  firebase_storage: ^13.0.1
+  firebase_storage: ^13.0.3
   table_calendar: ^3.2.0
   intl: ^0.20.2
   flutter_local_notifications: ^19.4.2
