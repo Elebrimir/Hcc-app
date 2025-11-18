@@ -37,6 +37,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [2.0.5] - 2025-11-18
+
+test: Remove `EventFormModal` assertions and use dynamic dates in dashboard tests, and add 2.0.4 changelog entry.
+
 ## [2.0.4] - 2025-09-29
 
 feat: Corregir la referencia del mensaje de commit en la actualización del cuerpo de la PR
