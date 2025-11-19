@@ -65,14 +65,14 @@ jobs:
           done
 
       - name: Upload APK artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: android-release
           path: build/app/outputs/flutter-apk/*.apk
           retention-days: 7
 
       - name: Upload APK size analysis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: apk-size-analysis
           path: apk_analysis
@@ -141,14 +141,14 @@ jobs:
           fi
 
       - name: Upload iOS artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ios-release
           path: build/ios/iphoneos
           retention-days: 7
 
       - name: Upload iOS size analysis
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ios-size-analysis
           path: ios_analysis
