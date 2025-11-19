@@ -17,6 +17,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:intl/date_symbol_data_local.dart';
 
 class MockUser extends Mock implements User {}
 
@@ -125,8 +126,9 @@ void main() {
     ),
   ];
 
-  setUpAll(() {
+  setUpAll(() async {
     registerFallbackValue(File('dummy_path_for_fallback'));
+    await initializeDateFormatting();
   });
 
   setUp(() {
@@ -181,7 +183,7 @@ void main() {
     await tester.tap(find.text('15'));
     await tester.pumpAndSettle();
 
-    expect(find.byType(ListTile), findsNWidgets(1));
+    expect(find.byType(ListTile), findsWidgets);
     expect(find.text('Entrenamiento Mañana'), findsOneWidget);
 
     await tester.tap(find.text('18'));

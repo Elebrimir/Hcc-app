@@ -51,17 +51,7 @@ class EventProvider extends ChangeNotifier {
     String creatorUid,
   ) async {
     try {
-      final eventMap = {
-        'title': eventData['title'],
-        'creatorUid': creatorUid,
-        'description': eventData['description'] ?? '',
-        'location': eventData['location'] ?? '',
-        'startTime': Timestamp.fromDate(eventData['startTime']),
-        'endTime': Timestamp.fromDate(
-          eventData['startTime'].add(const Duration(hours: 1)),
-        ),
-        'confirmedUsers': [],
-      };
+      final eventMap = {...eventData, 'creatorUid': creatorUid};
       final docRef = await _db.collection('events').add(eventMap);
       return docRef.id;
     } catch (e) {
@@ -75,15 +65,7 @@ class EventProvider extends ChangeNotifier {
     Map<String, dynamic> eventData,
   ) async {
     try {
-      final eventMap = {
-        'title': eventData['title'],
-        'startTime': Timestamp.fromDate(eventData['startTime']),
-        'endTime': Timestamp.fromDate(eventData['endTime']),
-        'description': eventData['description'],
-        'location': eventData['location'],
-        'confirmedUsers': eventData['confirmedUsers'] ?? [],
-      };
-      await _db.collection('events').doc(eventId).update(eventMap);
+      await _db.collection('events').doc(eventId).update(eventData);
     } catch (e) {
       debugPrint("Error en actualitzar l'esdeveniment: $e");
     }

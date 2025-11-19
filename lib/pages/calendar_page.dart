@@ -24,14 +24,19 @@ class _CalendarPageState extends State<CalendarPage> {
 
   Map<DateTime, List<Event>> _groupEvents(List<Event> events) {
     Map<DateTime, List<Event>> data = {};
+    final lastDay = DateTime.utc(2030, 12, 31);
+
     for (var event in events) {
-      final date = DateTime.utc(
-        event.startTime.year,
-        event.startTime.month,
-        event.startTime.day,
-      );
-      if (data[date] == null) data[date] = [];
-      data[date]!.add(event);
+      final occurrences = event.generateRecurrences(untilDate: lastDay);
+      for (var occurrence in occurrences) {
+        final date = DateTime.utc(
+          occurrence.startTime.year,
+          occurrence.startTime.month,
+          occurrence.startTime.day,
+        );
+        if (data[date] == null) data[date] = [];
+        data[date]!.add(occurrence);
+      }
     }
     return data;
   }
@@ -64,9 +69,21 @@ class _CalendarPageState extends State<CalendarPage> {
     return Column(
       children: [
         TableCalendar<Event>(
+          focusedDay: _focusedDay,
           firstDay: DateTime.utc(2020, 1, 1),
           lastDay: DateTime.utc(2030, 12, 31),
-          focusedDay: _focusedDay,
+          locale: 'ca_ES',
+          startingDayOfWeek: StartingDayOfWeek.monday,
+          availableCalendarFormats:
+              <CalendarFormat, String>{}..addAll(const {
+                CalendarFormat.month: 'Mes',
+                CalendarFormat.twoWeeks: '2 Setmanes',
+                CalendarFormat.week: 'Setmana',
+              }),
+          calendarFormat: CalendarFormat.month,
+          rowHeight: 43,
+          daysOfWeekHeight: 30,
+          weekendDays: const [DateTime.saturday, DateTime.sunday],
           selectedDayPredicate: (day) => isSameDay(_selectedDay, day),
           onDaySelected: (selectedDay, focusedDay) {
             setState(() {
