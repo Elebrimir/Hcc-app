@@ -38,6 +38,37 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [2.1.0] - 2025-11-19
+
+feat: Agregar lógica de recurrencia en el modelo de evento y crear selector de recurrencia (#153)
+
+### El commit 5f8ec51910074d28212491b23568d03b25815ce5 introduce la
+interfaz de usuario para crear eventos recurrentes.
+
+
+Nuevo Widget de Recurrencia (lib/widgets/recurrence_rule.dart):
+* Se ha creado un nuevo archivo que contiene el widget
+RecurrenceSelector.
+* Este componente permite al usuario:
+Activar si el evento es recurrente ("Esdeveniment recurrent?").
+Elegir la frecuencia (Diaria, Semanal, Mensual, Anual).
+Definir el intervalo (ej. cada 2 semanas).
+Seleccionar una fecha de finalización opcional.
+
+* Integración en el Formulario (lib/widgets/event_form_modal.dart):
+* Se ha añadido el RecurrenceSelector dentro del formulario de creación
+de eventos (EventFormModal).
+* Se han realizado ajustes visuales menores:
+Reducción de espacios (SizedBox) para compactar el formulario.
+Cambio de estilo en el botón "Canviar" (ahora usa color cyan).
+* Cambios en Dependencias (pubspec.lock):
+Hay pequeños cambios automáticos en las versiones de meta y test_api,
+probablemente fruto de ejecutar flutter pub get.
+
+En resumen, este commit conecta la lógica de recurrencia que vimos en el
+modelo con la interfaz visual, permitiendo a los usuarios configurar
+repeticiones al crear un evento.
+
 ## [2.0.5] - 2025-11-18
 
 test: Remove `EventFormModal` assertions and use dynamic dates in dashboard tests, and add 2.0.4 changelog entry.
