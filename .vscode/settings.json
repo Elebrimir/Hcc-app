@@ -1,4 +1,4 @@
 {
     "cmake.sourceDirectory": "/home/pablo-cortes/FlutterProjects/hcc_app/linux",
-    "java.configuration.updateBuildConfiguration": "interactive"
+    "java.configuration.updateBuildConfiguration": "automatic"
 }
