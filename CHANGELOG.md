@@ -40,6 +40,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [3.0.0] - 2025-11-20
+
+feat: Add Product and SaleOrder models with Firestore serialization and unit tests.
+
 ## [2.1.0] - 2025-11-19
 
 feat: Agregar lógica de recurrencia en el modelo de evento y crear selector de recurrencia (#153)
