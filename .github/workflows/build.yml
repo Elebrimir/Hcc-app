@@ -1,4 +1,8 @@
 name: Build App Workflow
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
 
 on:
   push:
@@ -6,18 +10,16 @@ on:
       - main
     paths:
       - "android/**"
-      - "ios/**"
       - "lib/**"
   workflow_dispatch:
     inputs:
       build:
-        description: "Tipo de build (android, ios)"
+        description: "Tipo de build (android)"
         required: true
         default: "android"
         type: choice
         options:
           - android
-          # - ios Comentado temporalmente para evitar builds fallidos por falta de certificados
 
 jobs:
   # Job para construir la aplicación Android
@@ -36,9 +38,6 @@ jobs:
 
       - name: Install dependencies
         run: flutter pub get
-
-      - name: Run tests
-        run: flutter test --reporter expanded --coverage
 
       - name: Build the app (Android)
         run: flutter build apk --split-per-abi
@@ -78,86 +77,10 @@ jobs:
           path: apk_analysis
           retention-days: 30
 
-  # Job para construir la aplicación iOS
-  build_ios_app:
-    runs-on: macos-latest
-    if: github.event_name == 'push' || github.event.inputs.build == 'ios'
-    steps:
-      - uses: actions/checkout@v5
-
-      - uses: dart-lang/setup-dart@9a04e6d73cca37bd455e0608d7e5092f881fd603
-
-      - uses: subosito/flutter-action@v2
-        with:
-          flutter-version: "3.x"
-          cache: true
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Run tests
-        run: flutter test --reporter expanded --coverage
-
-      - name: Clean previous builds
-        run: flutter clean
-
-      - name: Build the app (iOS)
-        run: flutter build ios --release --no-codesign
-
-      - name: Analyze iOS build size
-        run: |
-          mkdir -p ios_analysis
-          echo "# iOS Build Size Analysis" > ios_analysis/report.md
-          echo "## Build date: $(date)" >> ios_analysis/report.md
-          echo "## Commit: ${{ github.sha }}" >> ios_analysis/report.md
-          echo "" >> ios_analysis/report.md
-          echo "| Component | Size |" >> ios_analysis/report.md
-          echo "|-----------|------|" >> ios_analysis/report.md
-
-          # Analizar el directorio de la build de iOS
-          APP_PATH=$(find build/ios/iphoneos -name "*.app" -type d | head -n 1)
-          if [ -d "$APP_PATH" ]; then
-            app_size=$(du -sh "$APP_PATH" | cut -f1)
-            app_size_bytes=$(du -sb "$APP_PATH" | cut -f1)
-            app_name=$(basename "$APP_PATH" .app)
-            echo "| $app_name.app | $app_size ($app_size_bytes bytes) |" >> ios_analysis/report.md
-
-            # Guardar el tamaño para referencia
-            echo "$app_size_bytes" > "ios_analysis/${app_name}.size"
-
-            # Opcional: Desglose de componentes principales dentro del .app
-            echo "" >> ios_analysis/report.md
-            echo "## App Components" >> ios_analysis/report.md
-            echo "| Component | Size |" >> ios_analysis/report.md
-            echo "|-----------|------|" >> ios_analysis/report.md
-
-            find "$APP_PATH" -type f -not -path "*/\.*" -exec du -sh {} \; | sort -hr | head -n 10 |
-            while read size path; do
-              name=$(basename "$path")
-              echo "| $name | $size |" >> ios_analysis/report.md
-            done
-          else
-            echo "| No .app bundle found | N/A |" >> ios_analysis/report.md
-          fi
-
-      - name: Upload iOS artifacts
-        uses: actions/upload-artifact@v5
-        with:
-          name: ios-release
-          path: build/ios/iphoneos
-          retention-days: 7
-
-      - name: Upload iOS size analysis
-        uses: actions/upload-artifact@v5
-        with:
-          name: ios-size-analysis
-          path: ios_analysis
-          retention-days: 30
-
   notify_build_results:
     runs-on: ubuntu-latest
-    needs: [build_android_app, build_ios_app]
-    if: always() && (needs.build_android_app.result == 'success' || needs.build_ios_app.result == 'success')
+    needs: [build_android_app]
+    if: always() && (needs.build_android_app.result == 'success')
     steps:
       - name: Download Android analysis
         uses: actions/download-artifact@v6
@@ -165,14 +88,6 @@ jobs:
           name: apk-size-analysis
           path: size_analysis/android
         if: needs.build_android_app.result == 'success'
-        continue-on-error: true
-
-      - name: Download iOS analysis
-        uses: actions/download-artifact@v6
-        with:
-          name: ios-size-analysis
-          path: size_analysis/ios
-        if: needs.build_ios_app.result == 'success'
         continue-on-error: true
 
       - name: Generate summary
@@ -191,34 +106,9 @@ jobs:
             echo "" >> summary.md
           fi
 
-          # Añadir análisis de iOS si existe
-          if [ -f "size_analysis/ios/report.md" ]; then
-            echo "<details><summary>🍎 Análisis iOS</summary>" >> summary.md
-            echo "" >> summary.md
-            cat size_analysis/ios/report.md >> summary.md
-            echo "" >> summary.md
-            echo "</details>" >> summary.md
-            echo "" >> summary.md
-          fi
-
           # Guardar resumen como output para usar en los pasos siguientes
           MESSAGE=$(cat summary.md)
           MESSAGE="${MESSAGE//'%'/'%25'}"
           MESSAGE="${MESSAGE//$'\n'/'%0A'}"
           MESSAGE="${MESSAGE//$'\r'/'%0D'}"
           echo "content=$MESSAGE" >> $GITHUB_OUTPUT
-
-      - name: Comment on PR
-        if: github.event_name == 'pull_request'
-        uses: actions/github-script@v8
-        with:
-          github-token: ${{ secrets.GITHUB_TOKEN }}
-          script: |
-            const message = `${{ steps.summary.outputs.content }}`;
-
-            await github.rest.issues.createComment({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              issue_number: context.issue.number,
-              body: message
-            });

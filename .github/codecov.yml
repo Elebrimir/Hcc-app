@@ -8,8 +8,8 @@ coverage:
   status:
     project:
       default:
-        target: 70%
-        threshold: 5%
+        target: auto
+        threshold: 1%
         if_not_found: success
     patch:
       default:
@@ -17,7 +17,7 @@ coverage:
         threshold: 10%
 
 comment:
-  layout: "reach,diff,flags,files"
+  layout: "header, reach, diff, flags, files"
   behavior: default
   require_changes: false
   require_base: false
@@ -26,9 +26,17 @@ comment:
   branches: ["main", "dev"]
 
 flags:
-  flutter:
+  logic:
     paths:
-      - lib/
+      - lib/auth/
+      - lib/models/
+      - lib/providers/
+      - lib/services/
+    carryforward: true
+  ui:
+    paths:
+      - lib/pages/
+      - lib/widgets/
     carryforward: true
 
 ignore:
