@@ -8,11 +8,13 @@ void main() {
   group('Product Model', () {
     test('should correctly serialize and deserialize', () async {
       final instance = FakeFirebaseFirestore();
+      final size = Atribute(id: '1', name: 'size', value: 'M');
       final data = {
         'name': 'Test Product',
         'code': 'TP001',
         'price': 100.0,
         'image': 'http://image.com',
+        'attributes': [size.toMap()],
         'created_at': Timestamp.now(),
       };
       final ref = await instance.collection('products').add(data);
@@ -23,10 +25,14 @@ void main() {
       expect(product.name, 'Test Product');
       expect(product.price, 100.0);
       expect(product.code, 'TP001');
+      expect(product.attributes[0].name, 'size');
+      expect(product.attributes[0].value, 'M');
 
       final map = product.toFirestore();
       expect(map['name'], 'Test Product');
       expect(map['price'], 100.0);
+      expect(map['attributes'][0]['name'], 'size');
+      expect(map['attributes'][0]['value'], 'M');
     });
 
     test('should handle nulls and type conversion', () async {
@@ -41,14 +47,27 @@ void main() {
       expect(product.price, 100.0);
       expect(product.name, '');
       expect(product.code, '');
+      expect(product.attributes, []);
     });
 
     test('fromMap should work correctly', () {
-      final data = {'id': '123', 'name': 'Map Product', 'price': 50};
+      final size = Atribute(id: '1', name: 'color', value: 'red');
+      final data = {
+        'id': '123',
+        'name': 'Map Product',
+        'price': 50,
+        'attributes': [size.toMap()],
+      };
       final product = Product.fromMap(data);
       expect(product.id, '123');
       expect(product.name, 'Map Product');
       expect(product.price, 50.0);
+      expect(product.attributes[0].name, 'color');
+      expect(product.attributes[0].value, 'red');
+      //Remove attributes from map to return empty list
+      data.remove('attributes');
+      final product2 = Product.fromMap(data);
+      expect(product2.attributes, []);
     });
   });
 
@@ -57,13 +76,24 @@ void main() {
       'should correctly serialize and deserialize with nested objects',
       () async {
         final instance = FakeFirebaseFirestore();
+        final now = Timestamp.now();
         final partnerData = {
           'id': 'user1',
           'name': 'John',
           'email': 'john@test.com',
           'role': 'admin',
         };
-        final productData = {'id': 'prod1', 'name': 'Prod 1', 'price': 50.0};
+        final size = Atribute(id: '1', name: 'size', value: 'M');
+        final color = Atribute(id: '2', name: 'color', value: 'red');
+        final productData = {
+          'id': 'prod1',
+          'name': 'Prod 1',
+          'code': 'P1',
+          'price': 50.0,
+          'image': 'http://image.com',
+          'attributes': [size.toMap(), color.toMap()],
+          'created_at': now,
+        };
         final lineData = {
           'id': 'line1',
           'product': productData,
@@ -76,12 +106,12 @@ void main() {
 
         final orderData = {
           'name': 'Order 1',
-          'date': Timestamp.now(),
+          'date': now,
           'status': 'draft',
           'partner': partnerData,
           'saleOrderLines': [lineData],
           'amount': 100.0,
-          'created_at': Timestamp.now(),
+          'created_at': now,
         };
 
         final ref = await instance.collection('orders').add(orderData);
@@ -93,11 +123,47 @@ void main() {
         expect(order.partner.name, 'John');
         expect(order.saleOrderLines.length, 1);
         expect(order.saleOrderLines.first.product.name, 'Prod 1');
+        expect(order.saleOrderLines.first.product.code, 'P1');
+        expect(order.saleOrderLines.first.product.price, 50.0);
+        expect(order.saleOrderLines.first.product.image, 'http://image.com');
+        expect(order.saleOrderLines.first.product.attributes.length, 2);
+        expect(order.saleOrderLines.first.product.attributes[0].name, 'size');
+        expect(order.saleOrderLines.first.product.attributes[0].value, 'M');
+        expect(order.saleOrderLines.first.product.attributes[1].name, 'color');
+        expect(order.saleOrderLines.first.product.attributes[1].value, 'red');
         expect(order.saleOrderLines.first.total, 100.0);
+        expect(order.saleOrderLines.first.product.createdAt, now);
 
         final map = order.toFirestore();
         expect(map['partner']['name'], 'John');
         expect(map['saleOrderLines'][0]['product']['name'], 'Prod 1');
+        expect(map['saleOrderLines'][0]['product']['code'], 'P1');
+        expect(map['saleOrderLines'][0]['product']['price'], 50.0);
+        expect(
+          map['saleOrderLines'][0]['product']['image'],
+          'http://image.com',
+        );
+        expect(
+          map['saleOrderLines'][0]['product']['created_at'],
+          isA<FieldValue>(),
+        );
+        expect(
+          map['saleOrderLines'][0]['product']['attributes'][0]['name'],
+          'size',
+        );
+        expect(
+          map['saleOrderLines'][0]['product']['attributes'][0]['value'],
+          'M',
+        );
+        expect(
+          map['saleOrderLines'][0]['product']['attributes'][1]['name'],
+          'color',
+        );
+        expect(
+          map['saleOrderLines'][0]['product']['attributes'][1]['value'],
+          'red',
+        );
+        expect(map['saleOrderLines'][0]['total'], 100.0);
       },
     );
 

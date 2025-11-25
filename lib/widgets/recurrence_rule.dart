@@ -12,10 +12,10 @@ class RecurrenceSelector extends StatefulWidget {
   const RecurrenceSelector({super.key, required this.onRecurrenceChanged});
 
   @override
-  _RecurrenceSelectorState createState() => _RecurrenceSelectorState();
+  RecurrenceSelectorState createState() => RecurrenceSelectorState();
 }
 
-class _RecurrenceSelectorState extends State<RecurrenceSelector> {
+class RecurrenceSelectorState extends State<RecurrenceSelector> {
   bool _isRecurrent = false;
   RecurrenceFrequency _frequency = RecurrenceFrequency.weekly;
   int _interval = 1;

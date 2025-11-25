@@ -9,17 +9,16 @@ import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:hcc_app/models/event_model.dart';
+import 'package:flutter_timezone/flutter_timezone.dart';
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
   _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
-  static final _plugin = FlutterLocalNotificationsPlugin();
-
   static Future<void> requestPermissions() async {
     if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
-          _plugin
+          _flutterLocalNotificationsPlugin
               .resolvePlatformSpecificImplementation<
                 AndroidFlutterLocalNotificationsPlugin
               >();
@@ -31,6 +30,8 @@ class NotificationService {
   // 1. Inicializa el plugin de notificaciones
   static Future<void> init() async {
     tz.initializeTimeZones();
+    final timezoneInfo = await FlutterTimezone.getLocalTimezone();
+    tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
 
     const AndroidInitializationSettings initializationSettingsAndroid =
         AndroidInitializationSettings('ic_notification');
@@ -52,6 +53,26 @@ class NotificationService {
         }
       },
     );
+
+    // Crear el canal de notificación para Android
+    if (Platform.isAndroid) {
+      const AndroidNotificationChannel channel = AndroidNotificationChannel(
+        'event_channel_id',
+        'Event Notifications',
+        description: 'Notificaciones para eventos HCC.',
+        importance: Importance.max,
+        playSound: true,
+        enableVibration: true,
+      );
+
+      await _flutterLocalNotificationsPlugin
+          .resolvePlatformSpecificImplementation<
+            AndroidFlutterLocalNotificationsPlugin
+          >()
+          ?.createNotificationChannel(channel);
+
+      debugPrint('Canal de notificación creado: ${channel.id}');
+    }
   }
 
   static Future<void> scheduleEventNotification(
@@ -63,6 +84,23 @@ class NotificationService {
     final tz.TZDateTime scheduledTime = tz.TZDateTime.from(
       event.startTime.subtract(reminderTime),
       tz.local,
+    );
+
+    // Validar que la notificación no sea para el pasado
+    final now = tz.TZDateTime.now(tz.local);
+    if (scheduledTime.isBefore(now)) {
+      debugPrint(
+        'No se puede programar notificación para el pasado. '
+        'Evento: ${event.title}, '
+        'Hora programada: $scheduledTime, '
+        'Hora actual: $now',
+      );
+      return; // No programar notificaciones para el pasado
+    }
+
+    debugPrint(
+      'Programando notificación para: ${event.title} '
+      'a las $scheduledTime (${scheduledTime.timeZoneName})',
     );
 
     const AndroidNotificationDetails androidDetails =
@@ -92,7 +130,9 @@ class NotificationService {
         matchDateTimeComponents: DateTimeComponents.dateAndTime,
         payload: event.id,
       );
+      debugPrint('Notificación programada exitosamente para ${event.title}');
     } on PlatformException catch (e) {
+      debugPrint('Error al programar notificación: ${e.code} - ${e.message}');
       if (e.code == 'exact_alarms_not_permitted') {
         // En caso de que no se pueda programar la alarma exacta,
         // se intenta programar una menos precisa para evitar que la app falle.
@@ -105,6 +145,9 @@ class NotificationService {
           androidScheduleMode: AndroidScheduleMode.inexact,
           matchDateTimeComponents: DateTimeComponents.dateAndTime,
           payload: event.id,
+        );
+        debugPrint(
+          'Notificación programada en modo inexacto para ${event.title}',
         );
       } else {
         rethrow;

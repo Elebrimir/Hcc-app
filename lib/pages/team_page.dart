@@ -1,4 +1,3 @@
-// TODO: Add test coverage for this file
 // Copyright (c) 2025 HCC. All rights reserved.
 // Use of this source code is governed by an GNU GENERAL PUBLIC LICENSE
 // license that can be found in the LICENSE file.
@@ -106,14 +105,18 @@ class TeamDisplayItem extends StatelessWidget {
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  if (team.coaches != null) const SizedBox(height: 50.0),
-                  Text(
-                    'Entrenadors: ${team.coaches!.map((coach) => coach.name).join(', ')}',
-                  ),
-                  if (team.delegates != null) const SizedBox(height: 5.0),
-                  Text(
-                    'Delegats: ${team.delegates!.map((delegate) => delegate.name).join(', ')}',
-                  ),
+                  if (team.coaches != null) ...[
+                    const SizedBox(height: 50.0),
+                    Text(
+                      'Entrenadors: ${team.coaches!.map((coach) => coach.name).join(', ')}',
+                    ),
+                  ],
+                  if (team.delegates != null) ...[
+                    const SizedBox(height: 5.0),
+                    Text(
+                      'Delegats: ${team.delegates!.map((delegate) => delegate.name).join(', ')}',
+                    ),
+                  ],
                 ],
               ),
             ),
