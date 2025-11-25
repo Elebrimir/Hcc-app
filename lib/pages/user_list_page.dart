@@ -1,4 +1,3 @@
-// TODO: Add test coverage for this file
 // Copyright (c) 2025 HCC. All rights reserved.
 // Use of this source code is governed by an GNU GENERAL PUBLIC LICENSE
 // license that can be found in the LICENSE file.
@@ -10,12 +9,14 @@ import 'package:hcc_app/widgets/user_data_wrapper.dart';
 import 'package:hcc_app/widgets/user_display_item.dart';
 
 class UserListPage extends StatelessWidget {
-  const UserListPage({super.key});
+  final FirebaseFirestore? firestore;
+
+  const UserListPage({super.key, this.firestore});
 
   @override
   Widget build(BuildContext context) {
     final Stream<QuerySnapshot<UserModel>> userStream =
-        FirebaseFirestore.instance
+        (firestore ?? FirebaseFirestore.instance)
             .collection('users')
             .withConverter<UserModel>(
               fromFirestore: UserModel.fromFirestore,
