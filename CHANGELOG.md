@@ -4,6 +4,7 @@
 
 - [Registro de Cambios](#registro-de-cambios)
   - [[No publicado]](#no-publicado)
+  - [[3.0.1] - 2025-11-26](#301---2025-11-26)
   - [[3.0.0] - 2025-11-20](#300---2025-11-20)
   - [[2.1.0] - 2025-11-19](#210---2025-11-19)
     - [El commit 5f8ec51910074d28212491b23568d03b25815ce5 introduce la](#el-commit-5f8ec51910074d28212491b23568d03b25815ce5-introduce-la)

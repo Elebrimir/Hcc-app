@@ -33,44 +33,74 @@ jobs:
           fetch-depth: 0
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Check for existing version bump PRs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          OPEN_PRS=$(gh pr list --label "version-bump" --state open --json number --jq length)
+          if [ "$OPEN_PRS" -gt 0 ]; then
+            echo "⚠️ Ya existe un PR de version bump abierto. Cancelando workflow."
+            exit 1
+          fi
+          echo "✓ No hay PRs de version bump abiertos"
+
       - name: Set up Dart
         uses: dart-lang/setup-dart@v1
 
       - name: Determine bump type
         id: bump-type
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            echo "type=${{ github.event.inputs.bump }}" >> $GITHUB_OUTPUT
-            echo "Usando tipo de bump especificado manualmente: ${{ github.event.inputs.bump }}"
+          # Obtener último TAG con fallback para primera release
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "")
+
+          if [ -z "$LATEST_TAG" ]; then
+            echo "⚠️ No se encontró ningún tag. Asumiendo primera release."
+            LATEST_TAG=$(git rev-list --max-parents=0 HEAD)
+            echo "Usando commit inicial: $LATEST_TAG"
           else
-            # Obtener los archivos nuevos agregados en el último commit
-            NEW_FILES=$(git diff --name-only --diff-filter=A HEAD~1 HEAD | grep -E '^lib/' || echo "")
+            echo "✓ Último tag detectado: $LATEST_TAG"
+          fi
+
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            BUMP_TYPE="${{ github.event.inputs.bump }}"
+            echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
+            echo "📝 Usando tipo de bump especificado manualmente: $BUMP_TYPE"
+          else
+            # Obtener archivos cambiados y nuevos
+            CHANGED_FILES=$(git diff --name-only --diff-filter=AM $LATEST_TAG..HEAD | grep -E '^(lib|test|widgets)/' || echo "")
+            NEW_FILES=$(git diff --name-only --diff-filter=A $LATEST_TAG..HEAD | grep -E '^(lib|test|widgets)/' || echo "")
 
             # Contar archivos nuevos en categorías específicas
-            NEW_MODELS_PAGES_TESTS=$(echo "$NEW_FILES" | grep -E 'lib/(models|pages|widgets)/' | wc -l)
+            NEW_MODELS_PAGES_WIDGETS=$(echo "$NEW_FILES" | grep -E 'lib/(models|pages|widgets)/' | wc -l)
             TOTAL_NEW_FILES=$(echo "$NEW_FILES" | wc -l)
 
-            # Determinar tipo de bump
+            # Determinar tipo de bump basado en cambios
             if [ "$TOTAL_NEW_FILES" -gt 1 ]; then
               BUMP_TYPE="major"
-              echo "Más de 1 archivo nuevo detectado: MAJOR bump"
-            elif [ "$NEW_MODELS_PAGES_TESTS" -eq 1 ]; then
+              echo "🚀 MAJOR bump: $TOTAL_NEW_FILES archivos nuevos detectados"
+            elif [ "$NEW_MODELS_PAGES_WIDGETS" -ge 1 ]; then
               BUMP_TYPE="minor"
-              echo "1 archivo nuevo en models, pages, widgets: MINOR bump"
+              echo "✨ MINOR bump: $NEW_MODELS_PAGES_WIDGETS archivo(s) nuevo(s) en models/pages/widgets"
             else
               BUMP_TYPE="patch"
-              echo "Solo modificaciones detectadas o tests añadidos: PATCH bump"
+              echo "🔧 PATCH bump: Solo modificaciones o tests añadidos"
             fi
 
             echo "type=$BUMP_TYPE" >> $GITHUB_OUTPUT
-            echo "Tipo de bump determinado automáticamente: $BUMP_TYPE"
           fi
 
-          # Obtener el mensaje del último commit para el CHANGELOG
-          COMMIT_MSG=$(git log -1 --pretty=%B)
+          # Obtener mensajes de commits desde el último tag
+          COMMIT_MSGS=$(git log $LATEST_TAG..HEAD --pretty=format:'* %s' --reverse | grep -v '^\s*$' || echo "* Initial release")
           echo "commit_message<<EOF" >> $GITHUB_OUTPUT
-          echo "$COMMIT_MSG" >> $GITHUB_OUTPUT
+          echo "$COMMIT_MSGS" >> $GITHUB_OUTPUT
           echo "EOF" >> $GITHUB_OUTPUT
+
+          # Crear resumen para GitHub Actions
+          echo "### 📊 Análisis de Cambios" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tipo de bump:** \`$BUMP_TYPE\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Archivos nuevos:** $TOTAL_NEW_FILES" >> $GITHUB_STEP_SUMMARY
+          echo "- **Desde tag:** \`$LATEST_TAG\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Read current version
         id: current-version
@@ -108,7 +138,15 @@ jobs:
           NEW_VERSION="$MAJOR.$MINOR.$PATCH"
           echo "new_version=$NEW_VERSION" >> $GITHUB_OUTPUT
           echo "new_build=$NEW_BUILD" >> $GITHUB_OUTPUT
-          echo "Nueva versión: $NEW_VERSION+$NEW_BUILD"
+          echo "✓ Nueva versión: $NEW_VERSION+$NEW_BUILD"
+
+          # Añadir al resumen
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### 🎯 Nueva Versión" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Anterior:** \`$CURRENT_VERSION+$CURRENT_BUILD\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Nueva:** \`$NEW_VERSION+$NEW_BUILD\`" >> $GITHUB_STEP_SUMMARY
+          echo "- **Tipo:** \`$BUMP_TYPE\`" >> $GITHUB_STEP_SUMMARY
 
       - name: Update pubspec.yaml
         run: |
@@ -120,75 +158,104 @@ jobs:
           COMMIT_MSG_ENV: ${{ steps.bump-type.outputs.commit_message }}
         run: |
           DATE=$(date +%Y-%m-%d)
-          RAW_COMMIT_MSG="$COMMIT_MSG_ENV"
-          # 1. Procesar el mensaje del commit: Convertir '\n' literal en saltos de línea reales
-          #    Usamos printf '%b' que interpreta las secuencias de escape como \n, \t, etc.
-          COMMIT_MSG=$(printf '%b' "$RAW_COMMIT_MSG")
-          # 2. Preparar la línea de cabecera para la nueva entrada
+          COMMIT_MSG=$(printf '%b' "$COMMIT_MSG_ENV")
           HEADER_LINE="## [${{ steps.bump-version.outputs.new_version }}] - ${DATE}"
-          # 3. Usar awk para insertar la nueva entrada con el formato correcto
-          #    - Se pasan las variables header y msg a awk de forma segura con -v
-          #    - Busca la línea que empieza con "## [No publicado]" (escapando los corchetes)
-          #    - Cuando la encuentra (y solo la primera vez, usando el flag 'inserted'):
-          #      - Imprime la línea original "## [No publicado]"
-          #      - Imprime una línea en blanco
-          #      - Imprime la línea de cabecera nueva (HEADER_LINE)
-          #      - Imprime otra línea en blanco
-          #      - Imprime el mensaje del commit ya procesado (COMMIT_MSG)
-          #      - Pone el flag inserted=1 y salta al siguiente ciclo (next)
-          #    - Para todas las demás líneas, simplemente las imprime (print $0)
-          #    - Se redirige la salida a un archivo temporal y luego se reemplaza el original
+
+          # Insertar nueva entrada después de "## [No publicado]"
           awk -v header="$HEADER_LINE" -v msg="$COMMIT_MSG" '
           BEGIN { inserted=0 }
           /## \[No publicado\]/ && !inserted {
-            print $0;        # Imprime "## [No publicado]"
-            print "";        # Imprime línea en blanco
-            print header;    # Imprime "## [x.y.z] - YYYY-MM-DD"
-            print "";        # Imprime línea en blanco
-            print msg;       # Imprime el mensaje procesado (con saltos de línea reales)
-            inserted=1;      # Marca como insertado
-            next             # Pasa a la siguiente línea del input sin imprimirla por defecto
+            print $0
+            print ""
+            print header
+            print ""
+            print msg
+            inserted=1
+            next
           }
-          { print $0 }       # Imprime cualquier otra línea
+          { print $0 }
           ' CHANGELOG.md > CHANGELOG.md.new && mv CHANGELOG.md.new CHANGELOG.md
-          echo "--- Updated CHANGELOG.md ---"
-          cat CHANGELOG.md
-          echo "----------------------------"
+
+          echo "✓ CHANGELOG.md actualizado"
+
+      - name: Install pre-commit
+        run: pip install pre-commit
+
+      - name: Run pre-commit
+        id: pre-commit-run
+        continue-on-error: true
+        run: |
+          pre-commit run --all-files || true
+          if [[ -n $(git status -s) ]]; then
+            echo "✓ Pre-commit realizó cambios automáticos"
+            echo "changed=true" >> $GITHUB_OUTPUT
+          else
+            echo "✓ Pre-commit no encontró cambios necesarios"
+            echo "changed=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Commit pre-commit changes
+        uses: stefanzweifel/git-auto-commit-action@v5
+        if: steps.pre-commit-run.outputs.changed == 'true'
+        with:
+          commit_message: 'chore: apply pre-commit fixes [skip ci]'
+          token: ${{ secrets.GITHUB_TOKEN }}
+          file_pattern: '.'
 
       - name: Create Pull Request for Version Bump
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PR_BODY_ENV : ${{ steps.bump-type.outputs.commit_message }}
+          PR_BODY_ENV: ${{ steps.bump-type.outputs.commit_message }}
         run: |
-          # Definir variables útiles
           NEW_VERSION_FULL="${{ steps.bump-version.outputs.new_version }}+${{ steps.bump-version.outputs.new_build }}"
-          BRANCH_NAME="bump/version-${NEW_VERSION_FULL}" # Nombre para la nueva rama
-          COMMIT_MSG="Bump version to ${NEW_VERSION_FULL}" # Mensaje de commit
-          PR_TITLE="${COMMIT_MSG}" # Título para la PR
-          # Cuerpo para la PR (usaremos el mensaje procesado del commit original)
-          PR_BODY=$(printf '%b' "$PR_BODY_ENV")
-          echo "Configurando Git..."
-          git config --local user.email "action@github.com"
-          # Puedes poner un nombre más descriptivo si quieres
-          git config --local user.name "GitHub Action Bot [version bump]"
-          echo "Creando y cambiando a la nueva rama: ${BRANCH_NAME}"
+          BRANCH_NAME="bump/version-${NEW_VERSION_FULL}"
+          COMMIT_MSG="chore: bump version to ${NEW_VERSION_FULL}"
+          PR_TITLE="🔖 Bump version to ${NEW_VERSION_FULL}"
+
+          # Formatear el cuerpo de la PR
+          PR_BODY=$(cat <<EOF
+          ## 📦 Version Bump
+
+          **Tipo:** \`${{ steps.bump-type.outputs.type }}\`
+          **Versión anterior:** \`${{ steps.current-version.outputs.version }}+${{ steps.current-version.outputs.build }}\`
+          **Nueva versión:** \`${NEW_VERSION_FULL}\`
+
+          ### 📝 Cambios incluidos
+
+          $(printf '%b' "$PR_BODY_ENV")
+
+          ---
+          *Este PR fue generado automáticamente por el workflow de version bump.*
+          EOF
+          )
+
+          echo "📝 Configurando Git..."
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+
+          echo "🌿 Creando rama: ${BRANCH_NAME}"
           git checkout -b ${BRANCH_NAME}
-          echo "Añadiendo y haciendo commit de los cambios..."
-          git add pubspec.yaml CHANGELOG.md
-          # Verifica si hay cambios antes de hacer commit para evitar errores si no hay nada que commitear
+
+          echo "📦 Añadiendo cambios..."
+          git add pubspec.yaml CHANGELOG.md README.md
+
           if git diff --staged --quiet; then
-            echo "No hay cambios para hacer commit."
-          else
-            git commit -m "${COMMIT_MSG}"
+            echo "⚠️ No hay cambios para commitear"
+            exit 1
           fi
-          echo "Subiendo la nueva rama ${BRANCH_NAME}..."
-          # --set-upstream para enlazar la rama local con la remota la primera vez
+
+          git commit -m "${COMMIT_MSG}"
+
+          echo "⬆️ Subiendo rama..."
           git push --set-upstream origin ${BRANCH_NAME}
-          echo "Creando Pull Request..."
-          # Usamos la CLI de GitHub (gh) que está preinstalada en los runners
+
+          echo "🔀 Creando Pull Request..."
           gh pr create \
             --base main \
             --head ${BRANCH_NAME} \
             --title "${PR_TITLE}" \
-            --body "${PR_BODY}"
-          echo "Pull Request creada."
+            --body "${PR_BODY}" \
+            --label "version-bump" \
+            --label "automated"
+
+          echo "✅ Pull Request creada exitosamente"
