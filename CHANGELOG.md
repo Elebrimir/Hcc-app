@@ -41,6 +41,10 @@ y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.h
 
 ## [No publicado]
 
+## [3.0.1] - 2025-11-26
+
+feat: enhance notification service with timezone configuration and Android channels, and add dedicated tests for TeamPage and UserListPage.
+
 ## [3.0.0] - 2025-11-20
 
 feat: Add Product and SaleOrder models with Firestore serialization and unit tests.
