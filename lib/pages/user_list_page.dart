@@ -5,6 +5,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:hcc_app/models/user_model.dart';
+import 'package:hcc_app/utils/responsive_container.dart';
 import 'package:hcc_app/widgets/user_data_wrapper.dart';
 import 'package:hcc_app/widgets/user_display_item.dart';
 
@@ -24,35 +25,37 @@ class UserListPage extends StatelessWidget {
             )
             .snapshots();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Llistat d\'Usuaris'),
+    return ResponsiveContainer(
+      child: Scaffold(
+        appBar: AppBar(
+          title: const Text('Llistat d\'Usuaris'),
+          backgroundColor: Colors.grey[300],
+          elevation: 0,
+        ),
         backgroundColor: Colors.grey[300],
-        elevation: 0,
-      ),
-      backgroundColor: Colors.grey[300],
 
-      body: UserDataWrapper(
-        builder: (context, users) {
-          if (users.isEmpty) {
-            return const Center(
-              child: Text(
-                'No hi ha usuaris registrats.',
-                style: TextStyle(color: Colors.red, fontSize: 16),
-              ),
+        body: UserDataWrapper(
+          builder: (context, users) {
+            if (users.isEmpty) {
+              return const Center(
+                child: Text(
+                  'No hi ha usuaris registrats.',
+                  style: TextStyle(color: Colors.red, fontSize: 16),
+                ),
+              );
+            }
+
+            return ListView.builder(
+              padding: const EdgeInsets.symmetric(vertical: 8.0),
+              itemCount: users.length,
+              itemBuilder: (context, index) {
+                final user = users[index];
+                return UserDisplayItem(user: user);
+              },
             );
-          }
-
-          return ListView.builder(
-            padding: const EdgeInsets.symmetric(vertical: 8.0),
-            itemCount: users.length,
-            itemBuilder: (context, index) {
-              final user = users[index];
-              return UserDisplayItem(user: user);
-            },
-          );
-        },
-        userStream: userStream,
+          },
+          userStream: userStream,
+        ),
       ),
     );
   }

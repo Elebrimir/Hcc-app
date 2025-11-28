@@ -35,7 +35,9 @@ class UserDisplayItem extends StatelessWidget {
                         ? Theme.of(context).colorScheme.primaryContainer
                         : null,
                 backgroundImage:
-                    user.image != null ? NetworkImage(user.image!) : null,
+                    (user.image != null && user.image!.isNotEmpty)
+                        ? NetworkImage(user.image!)
+                        : null,
                 child:
                     (user.image == null)
                         ? Text(

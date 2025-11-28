@@ -10,110 +10,61 @@ service cloud.firestore {
       return request.auth != null && request.auth.uid == userId;
     }
 
-    // Función para verificar si se están intentando actualizar SOLO los campos permitidos del perfil
     function isUpdatingAllowedProfileFields() {
       let allowedFields = ['name', 'lastname', 'image'];
-      // Obtiene SÓLO las claves que están siendo modificadas en esta petición.
       let updatedKeys = request.resource.data.diff(resource.data).affectedKeys();
-      // hasOnly() ahora comprueba que las claves modificadas estén DENTRO del conjunto permitido.
       return updatedKeys.hasOnly(allowedFields);
     }
 
-    // Función para validar los datos del perfil que se están actualizando Y asegurar que los campos protegidos no cambian
     function areProfileFieldsValid() {
-      // request.resource.data representa cómo quedaría el documento DESPUÉS de la actualización
       let newData = request.resource.data;
-      // resource.data representa cómo está el documento ANTES de la actualización
       let oldData = resource.data;
-      // Lista de campos que vienen en la petición de actualización
       let incomingKeys = newData.keys();
 
-      // --- Validaciones de campos (solo si el campo viene en la actualización) ---
       let nameValid = !incomingKeys.hasAny(['name']) || (newData.name is string && newData.name.size() > 0 && newData.name.size() < 100);
       let lastnameValid = !incomingKeys.hasAny(['lastname']) || (newData.lastname is string && newData.lastname.size() < 100);
       let imageValid = !incomingKeys.hasAny(['image']) || ((newData.image is string && newData.image.size() < 500) || newData.image == null);
 
-      // --- Comprobaciones de Campos Protegidos (¡CRÍTICO!) ---
       let emailUnchanged = newData.email == oldData.email;
       let roleUnchanged = newData.role == oldData.role;
       let createdAtUnchanged = newData.created_at == oldData.get('created_at', null);
 
-      // Devuelve true sólo si todas las validaciones y comprobaciones pasan
       return nameValid && lastnameValid && imageValid && emailUnchanged && roleUnchanged && createdAtUnchanged;
     }
 
-    // --- REGLAS PARA LA COLECCIÓN 'users' ---
     match /users/{userId} {
-      // LEER: Permitido si es el dueño
       allow read: if isOwner(userId);
-
-      // LISTAR Colección (LIST): Permitido para CUALQUIER usuario autenticado.
       allow list: if request.auth != null;
-
-      // CREAR: Permitido si es el dueño.
-      allow create: if isOwner(userId); // Considera añadir validación: && isUserDataValidOnCreate();
-
-      // ACTUALIZAR: Permitido si es dueño, SOLO se actualizan campos permitidos Y los datos son válidos/protegidos.
+      allow create: if isOwner(userId);
       allow update: if isOwner(userId) && isUpdatingAllowedProfileFields() && areProfileFieldsValid();
-
-      // BORRAR: No permitido desde el cliente
       allow delete: if false;
     } // Fin /users/{userId}
 
-    // --- REGLAS PARA LA COLECCIÓN 'teams' ---
     match /teams/{teamId} {
 
-      // LEER (get un documento específico): Permitido para cualquier usuario autenticado.
       allow get: if request.auth != null;
-
-      // LISTAR (realizar consultas a la colección): Permitido para cualquier usuario autenticado.
-      // Esta regla es la que soluciona el error que estás experimentando.
       allow list: if request.auth != null;
-
-      // CREAR: Define quién puede crear equipos.
-      // Ejemplo: permitir solo a usuarios con un rol 'admin' (requiere custom claims o un campo 'role' en el doc del usuario)
-      // allow create: if request.auth != null && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin';
-      // Por ahora, lo dejamos deshabilitado por seguridad.
       allow create: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-
-      // ACTUALIZAR: Define quién puede actualizar equipos.
-      // Ejemplo: permitir a un admin o a coaches/delegados del equipo (requeriría lógica más compleja)
-      // function isTeamStaffOrAdmin(teamDoc) {
-      //   let userRole = get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role;
-      //   let isUserAdmin = userRole == 'admin';
-      //   // Asumiendo que 'coaches' y 'delegates' en TeamModel son listas de UIDs de usuarios.
-      //   // Si son listas de objetos UserModel, la comprobación es más compleja aquí.
-      //   // Sería mejor si fueran listas de UIDs.
-      //   let isCoach = request.auth.uid in teamDoc.data.coaches; // Si coaches es List<String> (UIDs)
-      //   let isDelegate = request.auth.uid in teamDoc.data.delegates; // Si delegates es List<String> (UIDs)
-      //   return isUserAdmin || isCoach || isDelegate;
-      // }
-      // allow update: if request.auth != null && isTeamStaffOrAdmin(resource); // y añadir validación de datos: && isTeamDataValid();
-      // Por ahora, lo dejamos deshabilitado por seguridad.
       allow update: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-
-      // BORRAR: Define quién puede borrar equipos.
-      // Por ahora, lo dejamos deshabilitado por seguridad.
       allow delete: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
 
     } // Fin /teams/{teamId}
 
     match /events/{eventId} {
 
-      // LEER (get y list): Permitido para cualquier usuario autenticado.
       allow get, list: if request.auth != null;
-
-      // CREAR: Permitido si el usuario está autenticado Y el evento que se va a crear
-      // tiene el campo 'creatorUid' y coincide con el UID del usuario que hace la petición.
       allow create: if request.auth != null && request.resource.data.creatorUid == request.auth.uid;
-
-      // ACTUALIZAR: Permitido si el usuario que hace la petición es el mismo que creó el evento.
-      // 'resource.data' es el estado del documento ANTES de la actualización.
       allow update: if request.auth != null && request.auth.uid == resource.data.creatorUid;
-
-      // BORRAR: Permitido si el usuario que hace la petición es el mismo que creó el evento.
       allow delete: if request.auth != null && request.auth.uid == resource.data.creatorUid;
     }
 
+    match /products/{productId} {
+
+      allow get, list: if request.auth != null;
+      allow create: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
+      allow update: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
+      allow delete: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
+
+    }
   } // Fin /databases/{database}/documents
 } // Fin service cloud.firestore

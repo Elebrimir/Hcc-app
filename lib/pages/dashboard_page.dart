@@ -5,11 +5,13 @@
 import 'package:flutter/material.dart';
 import 'package:hcc_app/pages/profile_page.dart';
 import 'package:hcc_app/pages/user_list_page.dart';
+import 'package:hcc_app/utils/responsive_container.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
 import 'package:hcc_app/pages/team_page.dart';
 import 'package:hcc_app/pages/calendar_page.dart';
+import 'package:hcc_app/pages/shop_page.dart';
 import 'package:hcc_app/models/event_model.dart';
 import 'package:hcc_app/widgets/event_form_modal.dart';
 
@@ -37,6 +39,7 @@ class _DashboardPageState extends State<DashboardPage> {
         ),
       ),
       const CalendarPage(),
+      const ShopPage(),
       const UserListPage(),
       const TeamPage(),
       const ProfilePage(),
@@ -70,43 +73,46 @@ class _DashboardPageState extends State<DashboardPage> {
     final userModel = userProvider.userModel;
     final userName = userModel?.name;
 
-    return Scaffold(
-      appBar: HccAppBar(
-        user: user,
-        userName: userName,
-        isDashboard: true,
-        formattedDate: _getFormattedDate(),
+    return ResponsiveContainer(
+      child: Scaffold(
+        appBar: HccAppBar(
+          user: user,
+          userName: userName,
+          isDashboard: true,
+          formattedDate: _getFormattedDate(),
+        ),
+        body: _pages[_selectedIndex],
+        floatingActionButton:
+            _selectedIndex == 1
+                ? FloatingActionButton(
+                  onPressed: () {
+                    _showEventFormModal(context);
+                  },
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                  child: const Icon(Icons.add, color: Colors.white),
+                )
+                : null,
+        bottomNavigationBar: BottomNavigationBar(
+          currentIndex: _selectedIndex,
+          onTap: _onItemTapped,
+          type: BottomNavigationBarType.fixed,
+          backgroundColor: Colors.grey[900],
+          selectedItemColor: Theme.of(context).colorScheme.tertiary,
+          unselectedItemColor: Colors.grey[500],
+          items: const [
+            BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.calendar_today),
+              label: 'Agenda',
+            ),
+            BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Tenda'),
+            BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Usuaris'),
+            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Equips'),
+            BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
+          ],
+        ),
+        backgroundColor: Colors.grey[800],
       ),
-      body: _pages[_selectedIndex],
-      floatingActionButton:
-          _selectedIndex == 1
-              ? FloatingActionButton(
-                onPressed: () {
-                  _showEventFormModal(context);
-                },
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-                child: const Icon(Icons.add, color: Colors.white),
-              )
-              : null,
-      bottomNavigationBar: BottomNavigationBar(
-        currentIndex: _selectedIndex,
-        onTap: _onItemTapped,
-        type: BottomNavigationBarType.fixed,
-        backgroundColor: Colors.grey[900],
-        selectedItemColor: Theme.of(context).colorScheme.tertiary,
-        unselectedItemColor: Colors.grey[500],
-        items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
-          BottomNavigationBarItem(
-            icon: Icon(Icons.calendar_today),
-            label: 'Agenda',
-          ),
-          BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Usuaris'),
-          BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Equips'),
-          BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
-        ],
-      ),
-      backgroundColor: Colors.grey[800],
     );
   }
 

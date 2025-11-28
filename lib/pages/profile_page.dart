@@ -6,6 +6,7 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:hcc_app/models/user_model.dart';
 import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/utils/responsive_container.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -135,25 +136,27 @@ class _ProfilePageState extends State<ProfilePage> {
     final isLoadingInitialData =
         userModel == null && firebaseUser != null && !isUploading && !isSaving;
 
-    return Scaffold(
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child:
-            isLoadingInitialData
-                ? const Center(child: CircularProgressIndicator())
-                : firebaseUser == null
-                ? const Center(child: Text('Si us plau, inicia sessió.'))
-                : userModel == null
-                ? const Center(
-                  child: Text('No s\'han pogut carregar les dades.'),
-                )
-                : _buildProfileForm(
-                  context,
-                  userProvider,
-                  userModel,
-                  isUploading,
-                  isSaving,
-                ),
+    return ResponsiveContainer(
+      child: Scaffold(
+        body: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child:
+              isLoadingInitialData
+                  ? const Center(child: CircularProgressIndicator())
+                  : firebaseUser == null
+                  ? const Center(child: Text('Si us plau, inicia sessió.'))
+                  : userModel == null
+                  ? const Center(
+                    child: Text('No s\'han pogut carregar les dades.'),
+                  )
+                  : _buildProfileForm(
+                    context,
+                    userProvider,
+                    userModel,
+                    isUploading,
+                    isSaving,
+                  ),
+        ),
       ),
     );
   }
