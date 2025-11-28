@@ -3,18 +3,8 @@ rules_version = '2';
 service firebase.storage {
   match /b/{bucket}/o {
 
-    // Regla específica para las imágenes de perfil
     match /profile_images/{userId}/{allPaths=**} {
-
-      // --- EL CAMBIO CLAVE ESTÁ AQUÍ ---
-
-      // Permitir la LECTURA (get) a CUALQUIERA.
-      // Esto es seguro porque la URL de descarga contiene un token único.
-      // 'get' es para descargar un solo archivo.
       allow get: if true;
-
-      // La regla de ESCRITURA está perfecta.
-      // Solo el dueño del perfil puede subir o cambiar su foto.
       allow write: if request.auth != null && request.auth.uid == userId;
     }
   }
