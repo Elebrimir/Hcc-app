@@ -10,12 +10,14 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:hcc_app/models/event_model.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 
 class NotificationService {
   static final FlutterLocalNotificationsPlugin
   _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
 
   static Future<void> requestPermissions() async {
+    if (kIsWeb) return;
     if (Platform.isAndroid) {
       final AndroidFlutterLocalNotificationsPlugin? androidImplementation =
           _flutterLocalNotificationsPlugin
@@ -27,8 +29,8 @@ class NotificationService {
     }
   }
 
-  // 1. Inicializa el plugin de notificaciones
   static Future<void> init() async {
+    if (kIsWeb) return;
     tz.initializeTimeZones();
     final timezoneInfo = await FlutterTimezone.getLocalTimezone();
     tz.setLocalLocation(tz.getLocation(timezoneInfo.identifier));
