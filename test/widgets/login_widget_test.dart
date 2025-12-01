@@ -22,8 +22,9 @@ class LoginWidgetTestWrapper extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       home: Builder(
-        builder: (scaffoldContext) =>
-            Scaffold(body: LoginPage(homePageContext: scaffoldContext)),
+        builder:
+            (scaffoldContext) =>
+                Scaffold(body: LoginPage(homePageContext: scaffoldContext)),
       ),
     );
   }

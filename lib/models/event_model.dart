@@ -40,9 +40,10 @@ class Event {
       recurrenceRule = RecurrenceRule(
         frequency: RecurrenceFrequency.values[ruleData['frequency']],
         interval: ruleData['interval'] ?? 1,
-        daysOfWeek: ruleData['daysOfWeek'] != null
-            ? List<int>.from(ruleData['daysOfWeek'])
-            : null,
+        daysOfWeek:
+            ruleData['daysOfWeek'] != null
+                ? List<int>.from(ruleData['daysOfWeek'])
+                : null,
         dayOfMonth: ruleData['dayOfMonth'],
         weekOfMonth: ruleData['weekOfMonth'],
       );
@@ -57,14 +58,16 @@ class Event {
       location: data['location'],
       confirmedUsers: List<String>.from(data['confirmedUsers'] ?? []),
       recurrenceRule: recurrenceRule,
-      recurrenceEndDate: data['recurrenceEndDate'] != null
-          ? (data['recurrenceEndDate'] as Timestamp).toDate()
-          : null,
-      excludedDates: data['excludedDates'] != null
-          ? (data['excludedDates'] as List)
-                .map((date) => (date as Timestamp).toDate())
-                .toList()
-          : [],
+      recurrenceEndDate:
+          data['recurrenceEndDate'] != null
+              ? (data['recurrenceEndDate'] as Timestamp).toDate()
+              : null,
+      excludedDates:
+          data['excludedDates'] != null
+              ? (data['excludedDates'] as List)
+                  .map((date) => (date as Timestamp).toDate())
+                  .toList()
+              : [],
       creatorUid: data['creatorUid'],
     );
   }
@@ -78,12 +81,12 @@ class Event {
       'location': location,
       'confirmedUsers': confirmedUsers,
       'recurrenceRule': recurrenceRule?.toJson(),
-      'recurrenceEndDate': recurrenceEndDate != null
-          ? Timestamp.fromDate(recurrenceEndDate!)
-          : null,
-      'excludedDates': excludedDates!
-          .map((date) => Timestamp.fromDate(date))
-          .toList(),
+      'recurrenceEndDate':
+          recurrenceEndDate != null
+              ? Timestamp.fromDate(recurrenceEndDate!)
+              : null,
+      'excludedDates':
+          excludedDates!.map((date) => Timestamp.fromDate(date)).toList(),
       'creatorUid': creatorUid,
     };
   }
@@ -155,11 +158,12 @@ extension EventRecurrence on Event {
 
     // Si recurrenceEndDate es null, usamos untilDate como límite (si existe)
     // Si recurrenceEndDate existe, el límite es el menor de los dos (recurrenceEndDate o untilDate)
-    final effectiveEndDate = recurrenceEndDate != null
-        ? (untilDate != null && untilDate.isBefore(recurrenceEndDate!)
-              ? untilDate
-              : recurrenceEndDate)
-        : untilDate;
+    final effectiveEndDate =
+        recurrenceEndDate != null
+            ? (untilDate != null && untilDate.isBefore(recurrenceEndDate!)
+                ? untilDate
+                : recurrenceEndDate)
+            : untilDate;
 
     while ((maxCount == null || count < maxCount) &&
         (effectiveEndDate == null ||

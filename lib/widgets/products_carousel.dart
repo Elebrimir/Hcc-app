@@ -33,9 +33,10 @@ class ProductsCarousel extends StatelessWidget {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return builder(context, []);
         }
-        final List<Product> products = snapshot.data!.docs
-            .map((docSnapshot) => docSnapshot.data())
-            .toList();
+        final List<Product> products =
+            snapshot.data!.docs
+                .map((docSnapshot) => docSnapshot.data())
+                .toList();
         return builder(context, products);
       },
     );

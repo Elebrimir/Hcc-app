@@ -33,9 +33,10 @@ class TeamDataWrapper extends StatelessWidget {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return builder(context, []);
         }
-        final List<TeamModel> teams = snapshot.data!.docs
-            .map((docSnapshot) => docSnapshot.data())
-            .toList();
+        final List<TeamModel> teams =
+            snapshot.data!.docs
+                .map((docSnapshot) => docSnapshot.data())
+                .toList();
         return builder(context, teams);
       },
     );

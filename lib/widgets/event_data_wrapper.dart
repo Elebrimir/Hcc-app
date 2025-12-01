@@ -35,9 +35,8 @@ class EventDataWrapper extends StatelessWidget {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return builder(context, []);
         }
-        final List<Event> events = snapshot.data!.docs
-            .map((doc) => Event.fromFirestore(doc))
-            .toList();
+        final List<Event> events =
+            snapshot.data!.docs.map((doc) => Event.fromFirestore(doc)).toList();
 
         return builder(context, events);
       },

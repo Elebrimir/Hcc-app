@@ -54,10 +54,8 @@ class UserProvider extends ChangeNotifier {
     FirebaseFirestore firestoreInstance,
   ) async {
     try {
-      final snapshot = await firestoreInstance
-          .collection('users')
-          .doc(user.uid)
-          .get();
+      final snapshot =
+          await firestoreInstance.collection('users').doc(user.uid).get();
 
       if (snapshot.exists) {
         _userModel = UserModel.fromFirestore(snapshot, null);
