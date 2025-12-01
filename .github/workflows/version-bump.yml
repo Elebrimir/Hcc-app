@@ -46,6 +46,8 @@ jobs:
 
       - name: Set up Dart
         uses: dart-lang/setup-dart@v1
+        with:
+          sdk: "3.10.1"
 
       - name: Determine bump type
         id: bump-type
