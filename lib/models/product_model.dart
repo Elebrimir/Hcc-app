@@ -33,10 +33,9 @@ class Product {
     final attributesList =
         attributesData
             ?.map(
-              (attr) =>
-                  (attr is DocumentReference)
-                      ? null
-                      : Atribute.fromMap(attr as Map<String, dynamic>),
+              (attr) => (attr is DocumentReference)
+                  ? null
+                  : Atribute.fromMap(attr as Map<String, dynamic>),
             )
             .whereType<Atribute>()
             .toList() ??

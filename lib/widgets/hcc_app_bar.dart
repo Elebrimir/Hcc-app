@@ -49,13 +49,12 @@ class _HccAppBarState extends State<HccAppBar> {
 
     if (!widget.isDashboard) {
       return AppBar(
-        title:
-            firebaseUser != null
-                ? Text(
-                  'Bienvenido ${userModel?.name ?? firebaseUser.email}',
-                  style: appBarTextStyle,
-                )
-                : const Text('Hoquei Club Cocentaina', style: appBarTextStyle),
+        title: firebaseUser != null
+            ? Text(
+                'Bienvenido ${userModel?.name ?? firebaseUser.email}',
+                style: appBarTextStyle,
+              )
+            : const Text('Hoquei Club Cocentaina', style: appBarTextStyle),
         backgroundColor: Colors.red[900],
         centerTitle: true,
         elevation: 5.0,
@@ -83,17 +82,17 @@ class _HccAppBarState extends State<HccAppBar> {
                 children: [
                   firebaseUser != null
                       ? Text(
-                        userModel?.name != null
-                            ? 'Hola ${userModel?.name}'.trim()
-                            : 'Hola ${firebaseUser.email}',
-                        style: appBarTextStyle,
-                        textAlign: TextAlign.center,
-                      )
+                          userModel?.name != null
+                              ? 'Hola ${userModel?.name}'.trim()
+                              : 'Hola ${firebaseUser.email}',
+                          style: appBarTextStyle,
+                          textAlign: TextAlign.center,
+                        )
                       : const Text(
-                        'Hoquei Club Cocentaina',
-                        style: appBarTextStyle,
-                        textAlign: TextAlign.center,
-                      ),
+                          'Hoquei Club Cocentaina',
+                          style: appBarTextStyle,
+                          textAlign: TextAlign.center,
+                        ),
                   if (widget.formattedDate != null)
                     Text(
                       widget.formattedDate!,
