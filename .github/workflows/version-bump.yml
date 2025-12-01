@@ -195,7 +195,7 @@ jobs:
           fi
 
       - name: Commit pre-commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@v7
         if: steps.pre-commit-run.outputs.changed == 'true'
         with:
           commit_message: 'chore: apply pre-commit fixes [skip ci]'
