@@ -242,6 +242,9 @@ jobs:
           echo "⬆️ Subiendo rama..."
           git push --set-upstream origin ${BRANCH_NAME}
 
+          echo "🏷️ Asegurando que existe el label..."
+          gh label create "version-bump" --color "0E8A16" --description "Automated version bump PR" --force || true
+
           echo "🔀 Creando Pull Request..."
           gh pr create \
             --base main \
