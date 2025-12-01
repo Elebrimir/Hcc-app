@@ -194,13 +194,6 @@ jobs:
             echo "changed=false" >> $GITHUB_OUTPUT
           fi
 
-      - name: Commit pre-commit changes
-        uses: stefanzweifel/git-auto-commit-action@v5
-        if: steps.pre-commit-run.outputs.changed == 'true'
-        with:
-          commit_message: 'chore: apply pre-commit fixes [skip ci]'
-          token: ${{ secrets.GITHUB_TOKEN }}
-          file_pattern: '.'
 
       - name: Create Pull Request for Version Bump
         env:
@@ -237,7 +230,7 @@ jobs:
           git checkout -b ${BRANCH_NAME}
 
           echo "📦 Añadiendo cambios..."
-          git add pubspec.yaml CHANGELOG.md README.md
+          git add .
 
           if git diff --staged --quiet; then
             echo "⚠️ No hay cambios para commitear"
