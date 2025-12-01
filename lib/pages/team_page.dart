@@ -13,14 +13,14 @@ class TeamPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final Stream<QuerySnapshot<TeamModel>> teamStream =
-        FirebaseFirestore.instance
-            .collection('teams')
-            .withConverter<TeamModel>(
-              fromFirestore: TeamModel.fromFirestore,
-              toFirestore: (TeamModel team, _) => team.toFirestore(),
-            )
-            .snapshots();
+    final Stream<QuerySnapshot<TeamModel>> teamStream = FirebaseFirestore
+        .instance
+        .collection('teams')
+        .withConverter<TeamModel>(
+          fromFirestore: TeamModel.fromFirestore,
+          toFirestore: (TeamModel team, _) => team.toFirestore(),
+        )
+        .snapshots();
 
     return Scaffold(
       appBar: AppBar(
@@ -75,28 +75,24 @@ class TeamDisplayItem extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 40,
-                backgroundColor:
-                    team.image == null
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : null,
-                backgroundImage:
-                    (team.image != null && team.image!.isNotEmpty)
-                        ? NetworkImage(team.image!)
-                        : null,
-                child:
-                    (team.image == null)
-                        ? Text(
-                          _getName(team),
-                          style: TextStyle(
-                            fontSize: 18,
-                            fontWeight: FontWeight.bold,
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
-                          ),
-                        )
-                        : null,
+                backgroundColor: team.image == null
+                    ? Theme.of(context).colorScheme.primaryContainer
+                    : null,
+                backgroundImage: (team.image != null && team.image!.isNotEmpty)
+                    ? NetworkImage(team.image!)
+                    : null,
+                child: (team.image == null)
+                    ? Text(
+                        _getName(team),
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(
+                            context,
+                          ).colorScheme.onPrimaryContainer,
+                        ),
+                      )
+                    : null,
               ),
               const SizedBox(width: 16.0),
               Expanded(

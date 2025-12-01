@@ -76,12 +76,12 @@ class _CalendarPageState extends State<CalendarPage> {
             lastDay: DateTime.utc(2030, 12, 31),
             locale: 'ca_ES',
             startingDayOfWeek: StartingDayOfWeek.monday,
-            availableCalendarFormats:
-                <CalendarFormat, String>{}..addAll(const {
-                  CalendarFormat.month: 'Mes',
-                  CalendarFormat.twoWeeks: '2 Setmanes',
-                  CalendarFormat.week: 'Setmana',
-                }),
+            availableCalendarFormats: <CalendarFormat, String>{}
+              ..addAll(const {
+                CalendarFormat.month: 'Mes',
+                CalendarFormat.twoWeeks: '2 Setmanes',
+                CalendarFormat.week: 'Setmana',
+              }),
             calendarFormat: CalendarFormat.month,
             rowHeight: 43,
             daysOfWeekHeight: 30,

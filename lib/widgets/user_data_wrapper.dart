@@ -30,10 +30,9 @@ class UserDataWrapper extends StatelessWidget {
         if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
           return builder(context, []);
         }
-        final List<UserModel> users =
-            snapshot.data!.docs
-                .map((docSnapshot) => docSnapshot.data())
-                .toList();
+        final List<UserModel> users = snapshot.data!.docs
+            .map((docSnapshot) => docSnapshot.data())
+            .toList();
         return builder(context, users);
       },
     );

@@ -244,9 +244,8 @@ class _EventFormModalState extends State<EventFormModal> {
                   labelText: 'Títol',
                   labelStyle: TextStyle(color: Colors.grey),
                 ),
-                validator:
-                    (value) =>
-                        value!.isEmpty ? 'El títol no pot estar buit' : null,
+                validator: (value) =>
+                    value!.isEmpty ? 'El títol no pot estar buit' : null,
               ),
               const SizedBox(height: 10),
               TextFormField(
@@ -269,8 +268,9 @@ class _EventFormModalState extends State<EventFormModal> {
                   TextButton(
                     onPressed: _selectStartDate,
                     style: TextButton.styleFrom(
-                      foregroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
+                      foregroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
                     ),
                     child: const Text(
                       'Canviar',
@@ -291,8 +291,9 @@ class _EventFormModalState extends State<EventFormModal> {
                   TextButton(
                     onPressed: _selectEndDate,
                     style: TextButton.styleFrom(
-                      foregroundColor:
-                          Theme.of(context).colorScheme.primaryContainer,
+                      foregroundColor: Theme.of(
+                        context,
+                      ).colorScheme.primaryContainer,
                     ),
                     child: const Text(
                       'Canviar',
@@ -344,16 +345,15 @@ class _EventFormModalState extends State<EventFormModal> {
                 _frequency = value!;
               });
             },
-            items:
-                RecurrenceFrequency.values.map((frequency) {
-                  return DropdownMenuItem(
-                    value: frequency,
-                    child: Text(
-                      _getFrequencyText(frequency),
-                      style: const TextStyle(color: Colors.white),
-                    ),
-                  );
-                }).toList(),
+            items: RecurrenceFrequency.values.map((frequency) {
+              return DropdownMenuItem(
+                value: frequency,
+                child: Text(
+                  _getFrequencyText(frequency),
+                  style: const TextStyle(color: Colors.white),
+                ),
+              );
+            }).toList(),
             decoration: const InputDecoration(
               labelText: 'Es repeteix cada',
               labelStyle: TextStyle(color: Colors.grey),
