@@ -46,8 +46,9 @@ class SaleOrder {
       name: data?['name'] ?? '',
       date: (data?['date'] as Timestamp?)?.toDate() ?? DateTime.now(),
       status: data?['status'] ?? '',
-      partner:
-          partnerData != null ? UserModel.fromMap(partnerData) : UserModel(),
+      partner: partnerData != null
+          ? UserModel.fromMap(partnerData)
+          : UserModel(),
       creatorUid: data?['creatorUid'] ?? '',
       amount: (data?['amount'] as num?)?.toDouble(),
       currency: data?['currency'],

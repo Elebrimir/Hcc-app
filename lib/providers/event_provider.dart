@@ -27,8 +27,9 @@ class EventProvider extends ChangeNotifier {
         .snapshots()
         .listen(
           (snapshot) {
-            _events =
-                snapshot.docs.map((doc) => Event.fromFirestore(doc)).toList();
+            _events = snapshot.docs
+                .map((doc) => Event.fromFirestore(doc))
+                .toList();
             _isLoading = false;
             notifyListeners();
           },

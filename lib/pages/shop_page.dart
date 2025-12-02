@@ -28,14 +28,13 @@ class ShopPage extends StatelessWidget {
                 ),
               ),
               ProductsCarousel(
-                productsStream:
-                    FirebaseFirestore.instance
-                        .collection('products')
-                        .withConverter<Product>(
-                          fromFirestore: Product.fromFirestore,
-                          toFirestore: (product, _) => product.toFirestore(),
-                        )
-                        .snapshots(),
+                productsStream: FirebaseFirestore.instance
+                    .collection('products')
+                    .withConverter<Product>(
+                      fromFirestore: Product.fromFirestore,
+                      toFirestore: (product, _) => product.toFirestore(),
+                    )
+                    .snapshots(),
                 builder: (context, products) {
                   if (products.isEmpty) {
                     return const Center(
@@ -61,25 +60,23 @@ class ShopPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 Expanded(
-                                  child:
-                                      product.image.isNotEmpty
-                                          ? Image.network(
-                                            product.image,
-                                            fit: BoxFit.cover,
-                                            width: double.infinity,
-                                            errorBuilder: (
-                                              context,
-                                              error,
-                                              stackTrace,
-                                            ) {
-                                              return const Center(
-                                                child: Icon(Icons.broken_image),
-                                              );
-                                            },
-                                          )
-                                          : const Center(
-                                            child: Icon(Icons.image, size: 50),
-                                          ),
+                                  child: product.image.isNotEmpty
+                                      ? Image.network(
+                                          product.image,
+                                          fit: BoxFit.cover,
+                                          width: double.infinity,
+                                          errorBuilder:
+                                              (context, error, stackTrace) {
+                                                return const Center(
+                                                  child: Icon(
+                                                    Icons.broken_image,
+                                                  ),
+                                                );
+                                              },
+                                        )
+                                      : const Center(
+                                          child: Icon(Icons.image, size: 50),
+                                        ),
                                 ),
                                 Padding(
                                   padding: const EdgeInsets.all(8.0),
