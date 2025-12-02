@@ -30,24 +30,28 @@ class UserDisplayItem extends StatelessWidget {
             children: [
               CircleAvatar(
                 radius: 30,
-                backgroundColor: user.image == null
-                    ? Theme.of(context).colorScheme.primaryContainer
-                    : null,
-                backgroundImage: (user.image != null && user.image!.isNotEmpty)
-                    ? NetworkImage(user.image!)
-                    : null,
-                child: (user.image == null)
-                    ? Text(
-                        _getInitials(user),
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onPrimaryContainer,
-                        ),
-                      )
-                    : null,
+                backgroundColor:
+                    user.image == null
+                        ? Theme.of(context).colorScheme.primaryContainer
+                        : null,
+                backgroundImage:
+                    (user.image != null && user.image!.isNotEmpty)
+                        ? NetworkImage(user.image!)
+                        : null,
+                child:
+                    (user.image == null)
+                        ? Text(
+                          _getInitials(user),
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                            color:
+                                Theme.of(
+                                  context,
+                                ).colorScheme.onPrimaryContainer,
+                          ),
+                        )
+                        : null,
               ),
               const SizedBox(width: 16.0),
               Expanded(
@@ -110,12 +114,12 @@ class UserDisplayItem extends StatelessWidget {
   }
 
   String _getInitials(UserModel user) {
-    final nameInitial = user.name?.isNotEmpty == true
-        ? user.name![0].toUpperCase()
-        : null;
-    final lastnameInitial = user.lastname?.isNotEmpty == true
-        ? user.lastname![0].toUpperCase()
-        : null;
+    final nameInitial =
+        user.name?.isNotEmpty == true ? user.name![0].toUpperCase() : null;
+    final lastnameInitial =
+        user.lastname?.isNotEmpty == true
+            ? user.lastname![0].toUpperCase()
+            : null;
 
     if (nameInitial != null && lastnameInitial != null) {
       return '$nameInitial$lastnameInitial';

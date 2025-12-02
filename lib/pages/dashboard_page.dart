@@ -82,15 +82,16 @@ class _DashboardPageState extends State<DashboardPage> {
           formattedDate: _getFormattedDate(),
         ),
         body: _pages[_selectedIndex],
-        floatingActionButton: _selectedIndex == 1
-            ? FloatingActionButton(
-                onPressed: () {
-                  _showEventFormModal(context);
-                },
-                backgroundColor: Theme.of(context).colorScheme.tertiary,
-                child: const Icon(Icons.add, color: Colors.white),
-              )
-            : null,
+        floatingActionButton:
+            _selectedIndex == 1
+                ? FloatingActionButton(
+                  onPressed: () {
+                    _showEventFormModal(context);
+                  },
+                  backgroundColor: Theme.of(context).colorScheme.tertiary,
+                  child: const Icon(Icons.add, color: Colors.white),
+                )
+                : null,
         bottomNavigationBar: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,

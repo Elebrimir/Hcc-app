@@ -23,13 +23,14 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ProductsCarousel(
-            productsStream: instance
-                .collection('products')
-                .withConverter<Product>(
-                  fromFirestore: Product.fromFirestore,
-                  toFirestore: (product, _) => product.toFirestore(),
-                )
-                .snapshots(),
+            productsStream:
+                instance
+                    .collection('products')
+                    .withConverter<Product>(
+                      fromFirestore: Product.fromFirestore,
+                      toFirestore: (product, _) => product.toFirestore(),
+                    )
+                    .snapshots(),
             builder: (context, products) {
               return ListView.builder(
                 itemCount: products.length,
@@ -57,13 +58,14 @@ void main() {
       MaterialApp(
         home: Scaffold(
           body: ProductsCarousel(
-            productsStream: instance
-                .collection('products')
-                .withConverter<Product>(
-                  fromFirestore: Product.fromFirestore,
-                  toFirestore: (product, _) => product.toFirestore(),
-                )
-                .snapshots(),
+            productsStream:
+                instance
+                    .collection('products')
+                    .withConverter<Product>(
+                      fromFirestore: Product.fromFirestore,
+                      toFirestore: (product, _) => product.toFirestore(),
+                    )
+                    .snapshots(),
             builder: (context, products) {
               if (products.isEmpty) {
                 return const Text('No products');

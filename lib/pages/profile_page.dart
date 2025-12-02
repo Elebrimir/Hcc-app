@@ -140,19 +140,22 @@ class _ProfilePageState extends State<ProfilePage> {
       child: Scaffold(
         body: Padding(
           padding: const EdgeInsets.all(16.0),
-          child: isLoadingInitialData
-              ? const Center(child: CircularProgressIndicator())
-              : firebaseUser == null
-              ? const Center(child: Text('Si us plau, inicia sessió.'))
-              : userModel == null
-              ? const Center(child: Text('No s\'han pogut carregar les dades.'))
-              : _buildProfileForm(
-                  context,
-                  userProvider,
-                  userModel,
-                  isUploading,
-                  isSaving,
-                ),
+          child:
+              isLoadingInitialData
+                  ? const Center(child: CircularProgressIndicator())
+                  : firebaseUser == null
+                  ? const Center(child: Text('Si us plau, inicia sessió.'))
+                  : userModel == null
+                  ? const Center(
+                    child: Text('No s\'han pogut carregar les dades.'),
+                  )
+                  : _buildProfileForm(
+                    context,
+                    userProvider,
+                    userModel,
+                    isUploading,
+                    isSaving,
+                  ),
         ),
       ),
     );
@@ -179,11 +182,16 @@ class _ProfilePageState extends State<ProfilePage> {
                 backgroundColor: Colors.grey.shade300,
                 backgroundImage:
                     (userModel.image != null && userModel.image!.isNotEmpty)
-                    ? NetworkImage(userModel.image!)
-                    : null,
-                child: (userModel.image == null || userModel.image!.isEmpty)
-                    ? const Icon(Icons.person, size: 60, color: Colors.white)
-                    : null,
+                        ? NetworkImage(userModel.image!)
+                        : null,
+                child:
+                    (userModel.image == null || userModel.image!.isEmpty)
+                        ? const Icon(
+                          Icons.person,
+                          size: 60,
+                          color: Colors.white,
+                        )
+                        : null,
               ),
               if (isUploading)
                 Container(
@@ -269,16 +277,17 @@ class _ProfilePageState extends State<ProfilePage> {
             padding: const EdgeInsets.symmetric(vertical: 15),
             textStyle: const TextStyle(fontSize: 18),
           ),
-          child: isSaving
-              ? const SizedBox(
-                  height: 20,
-                  width: 20,
-                  child: CircularProgressIndicator(
-                    color: Colors.white,
-                    strokeWidth: 3,
-                  ),
-                )
-              : const Text('Desa canvis'),
+          child:
+              isSaving
+                  ? const SizedBox(
+                    height: 20,
+                    width: 20,
+                    child: CircularProgressIndicator(
+                      color: Colors.white,
+                      strokeWidth: 3,
+                    ),
+                  )
+                  : const Text('Desa canvis'),
         ),
       ],
     );

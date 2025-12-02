@@ -52,12 +52,13 @@ class RecurrenceSelectorState extends State<RecurrenceSelector> {
                 _updateRecurrenceRule();
               });
             },
-            items: RecurrenceFrequency.values.map((frequency) {
-              return DropdownMenuItem(
-                value: frequency,
-                child: Text(_getFrequencyText(frequency)),
-              );
-            }).toList(),
+            items:
+                RecurrenceFrequency.values.map((frequency) {
+                  return DropdownMenuItem(
+                    value: frequency,
+                    child: Text(_getFrequencyText(frequency)),
+                  );
+                }).toList(),
             decoration: const InputDecoration(
               labelText: 'Freqüència de repetició',
               border: OutlineInputBorder(),
