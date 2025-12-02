@@ -4,6 +4,7 @@
 
 - [Registro de Cambios](#registro-de-cambios)
   - [[No publicado]](#no-publicado)
+  - [[4.0.2] - 2025-12-02](#402---2025-12-02)
   - [[4.0.1] - 2025-12-01](#401---2025-12-01)
   - [[4.0.0] - 2025-12-01](#400---2025-12-01)
   - [[3.1.0] - 2025-12-01](#310---2025-12-01)
@@ -44,6 +45,45 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [No publicado]
+
+## [4.0.2] - 2025-12-02
+
+* build(deps): Bump actions/checkout from 5 to 6
+* build(deps): Bump actions/checkout from 5 to 6 (#183)
+* build(deps): Bump mockito from 5.5.1 to 5.6.1
+* build(deps): Bump mockito from 5.5.1 to 5.6.1 (#186)
+* build(deps): Bump build_runner from 2.10.3 to 2.10.4
+* build(deps): Bump build_runner from 2.10.3 to 2.10.4 (#185)
+* build(deps): Bump image_picker from 1.2.0 to 1.2.1
+* build(deps): Bump image_picker from 1.2.0 to 1.2.1 (#184)
+* feat: Add comprehensive unit tests for pages, models, and widgets, refactor test directory structure, and update dependencies.
+* feat: enhance notification service with timezone configuration and Android channels, and add dedicated tests for TeamPage and UserListPage.
+* Bump version to 3.0.1+23
+* feat: improve automated version bump workflow with PR checks, detailed changelog generation, and pre-commit integration
+* feat: improve automated version bump (#191)
+* Updating Android Gradle plugin.
+* feat: Configure Firebase Hosting for Flutter web, update project metadata, and simplify Firestore rules.
+* feat: Add shop page with product carousel and integrate it into the dashboard navigation.
+* (feat): Page Orders Dart (#192)
+* Remove pre-commit auto-commit action and broaden `git add` scope in version bump workflow.
+* (fix): build_action (#194)
+* ci: Add 'version-bump' label creation to workflow.
+* (fix): version_bump (#195)
+* feat: add 'automated' GitHub label to the version bump workflow.
+* (fix): version_bump (#196)
+* chore: bump version to 3.1.0+24
+* 🔖 Bump version to 3.1.0+24 (#197)
+* chore: bump version to 4.0.0+25
+* ci: specify Dart SDK version in version bump workflow
+* 🔖 Bump version to 4.0.0+25 (#198)
+* Merge branch 'main' into action/fix_version_bump_5
+* (fix): version_bump (#199)
+* chore: bump version to 4.0.1+26
+* 🔖 Bump version to 4.0.1+26 (#200)
+* (fic):pre_commit
+* (fix):pre_commit (#201)
+* (fix):action_bump
+* (fix):action_bump (#203)
 
 ## [4.0.1] - 2025-12-01
 
