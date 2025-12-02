@@ -10,6 +10,7 @@ import 'package:provider/provider.dart';
 import 'package:hcc_app/services/notification_service.dart';
 import 'package:hcc_app/providers/user_provider.dart';
 import 'package:hcc_app/providers/event_provider.dart';
+import 'package:hcc_app/providers/convocatoria_provider.dart';
 import 'package:hcc_app/auth/auth_wrapper.dart';
 import 'package:hcc_app/firebase_options.dart';
 
@@ -24,6 +25,7 @@ Future<void> main() async {
       providers: [
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
+        ChangeNotifierProvider(create: (_) => ConvocatoriaProvider()),
       ],
       child: const MyApp(),
     ),
