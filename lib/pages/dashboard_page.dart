@@ -15,6 +15,8 @@ import 'package:hcc_app/pages/shop_page.dart';
 import 'package:hcc_app/models/event_model.dart';
 import 'package:hcc_app/widgets/event_form_modal.dart';
 
+import 'package:hcc_app/pages/convocatoria_list_page.dart';
+
 class DashboardPage extends StatefulWidget {
   const DashboardPage({super.key});
 
@@ -42,6 +44,7 @@ class _DashboardPageState extends State<DashboardPage> {
       const ShopPage(),
       const UserListPage(),
       const TeamPage(),
+      const ConvocatoriaListPage(),
       const ProfilePage(),
     ];
   }
@@ -108,6 +111,10 @@ class _DashboardPageState extends State<DashboardPage> {
             BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Tenda'),
             BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Usuaris'),
             BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Equips'),
+            BottomNavigationBarItem(
+              icon: Icon(Icons.assignment),
+              label: 'Convocatòries',
+            ),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
           ],
         ),
