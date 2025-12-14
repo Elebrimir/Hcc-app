@@ -15,6 +15,7 @@ class HccAppBar extends StatefulWidget implements PreferredSizeWidget {
   final bool isDashboard;
   final VoidCallback? onSignOut;
   final void Function(BuildContext)? onNavigate;
+  final GlobalKey<ScaffoldState>? scaffoldKey;
 
   const HccAppBar({
     super.key,
@@ -25,6 +26,7 @@ class HccAppBar extends StatefulWidget implements PreferredSizeWidget {
     this.isDashboard = false,
     this.onSignOut,
     this.onNavigate,
+    this.scaffoldKey,
   });
 
   @override
@@ -69,13 +71,24 @@ class _HccAppBarState extends State<HccAppBar> {
       );
     } else {
       return AppBar(
+        automaticallyImplyLeading: false,
         toolbarHeight: 120.0,
         title: Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10.0),
-              child: Image.asset('assets/images/logo_club.png', height: 60),
+              child: GestureDetector(
+                onTap: () {
+                  final role = userModel?.role;
+                  if (role == 'Admin' ||
+                      role == 'Coach' ||
+                      role == 'Delegate') {
+                    widget.scaffoldKey?.currentState?.openDrawer();
+                  }
+                },
+                child: Image.asset('assets/images/logo_club.png', height: 60),
+              ),
             ),
             Expanded(
               child: Column(

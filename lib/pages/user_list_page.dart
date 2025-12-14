@@ -28,11 +28,14 @@ class UserListPage extends StatelessWidget {
     return ResponsiveContainer(
       child: Scaffold(
         appBar: AppBar(
-          title: const Text('Llistat d\'Usuaris'),
-          backgroundColor: Colors.grey[300],
+          title: const Text(
+            'Llistat d\'Usuaris',
+            style: TextStyle(color: Colors.white),
+          ),
+          backgroundColor: Colors.red[900],
           elevation: 0,
         ),
-        backgroundColor: Colors.grey[300],
+        backgroundColor: Colors.grey[600],
 
         body: UserDataWrapper(
           builder: (context, users) {
@@ -40,7 +43,7 @@ class UserListPage extends StatelessWidget {
               return const Center(
                 child: Text(
                   'No hi ha usuaris registrats.',
-                  style: TextStyle(color: Colors.red, fontSize: 16),
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               );
             }

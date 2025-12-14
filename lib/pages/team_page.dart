@@ -24,8 +24,8 @@ class TeamPage extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Equips'),
-        backgroundColor: Colors.grey[300],
+        title: const Text('Equips', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.red[900],
         elevation: 0,
       ),
       backgroundColor: Colors.grey[300],

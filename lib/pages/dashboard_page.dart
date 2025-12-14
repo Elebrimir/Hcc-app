@@ -4,11 +4,11 @@
 
 import 'package:flutter/material.dart';
 import 'package:hcc_app/pages/profile_page.dart';
-import 'package:hcc_app/pages/user_list_page.dart';
 import 'package:hcc_app/utils/responsive_container.dart';
 import 'package:hcc_app/widgets/hcc_app_bar.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/widgets/admin_side_menu.dart';
 import 'package:hcc_app/pages/team_page.dart';
 import 'package:hcc_app/pages/calendar_page.dart';
 import 'package:hcc_app/pages/shop_page.dart';
@@ -17,8 +17,12 @@ import 'package:hcc_app/widgets/event_form_modal.dart';
 
 import 'package:hcc_app/pages/convocatoria_list_page.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class DashboardPage extends StatefulWidget {
-  const DashboardPage({super.key});
+  final FirebaseFirestore? firestore;
+
+  const DashboardPage({super.key, this.firestore});
 
   @override
   State<DashboardPage> createState() => _DashboardPageState();
@@ -26,6 +30,7 @@ class DashboardPage extends StatefulWidget {
 
 class _DashboardPageState extends State<DashboardPage> {
   int _selectedIndex = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   late final List<Widget> _pages;
 
@@ -40,9 +45,8 @@ class _DashboardPageState extends State<DashboardPage> {
           style: TextStyle(color: Colors.white, fontSize: 24),
         ),
       ),
+      ShopPage(firestore: widget.firestore),
       const CalendarPage(),
-      const ShopPage(),
-      const UserListPage(),
       const TeamPage(),
       const ConvocatoriaListPage(),
       const ProfilePage(),
@@ -78,12 +82,15 @@ class _DashboardPageState extends State<DashboardPage> {
 
     return ResponsiveContainer(
       child: Scaffold(
+        key: _scaffoldKey,
         appBar: HccAppBar(
+          scaffoldKey: _scaffoldKey,
           user: user,
           userName: userName,
           isDashboard: true,
           formattedDate: _getFormattedDate(),
         ),
+        drawer: AdminSideMenu(firestore: widget.firestore),
         body: _pages[_selectedIndex],
         floatingActionButton:
             _selectedIndex == 1
@@ -104,17 +111,16 @@ class _DashboardPageState extends State<DashboardPage> {
           unselectedItemColor: Colors.grey[500],
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Principal'),
+            BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Tenda'),
             BottomNavigationBarItem(
               icon: Icon(Icons.calendar_today),
               label: 'Agenda',
             ),
-            BottomNavigationBarItem(icon: Icon(Icons.store), label: 'Tenda'),
-            BottomNavigationBarItem(icon: Icon(Icons.group), label: 'Usuaris'),
-            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Equips'),
             BottomNavigationBarItem(
               icon: Icon(Icons.assignment),
               label: 'Convocatòries',
             ),
+            BottomNavigationBarItem(icon: Icon(Icons.list), label: 'Equips'),
             BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Perfil'),
           ],
         ),
