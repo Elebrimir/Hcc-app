@@ -9,13 +9,19 @@ import 'package:hcc_app/utils/responsive_container.dart';
 import 'package:hcc_app/widgets/products_carousel.dart';
 
 class ShopPage extends StatelessWidget {
-  const ShopPage({super.key});
+  final FirebaseFirestore? firestore;
+
+  const ShopPage({super.key, this.firestore});
 
   @override
   Widget build(BuildContext context) {
     return ResponsiveContainer(
       child: Scaffold(
-        appBar: AppBar(title: const Text('Botiga')),
+        appBar: AppBar(
+          title: const Text('Botiga', style: TextStyle(color: Colors.white)),
+          backgroundColor: Colors.red[900],
+          elevation: 0,
+        ),
         body: SingleChildScrollView(
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -29,7 +35,7 @@ class ShopPage extends StatelessWidget {
               ),
               ProductsCarousel(
                 productsStream:
-                    FirebaseFirestore.instance
+                    (firestore ?? FirebaseFirestore.instance)
                         .collection('products')
                         .withConverter<Product>(
                           fromFirestore: Product.fromFirestore,
