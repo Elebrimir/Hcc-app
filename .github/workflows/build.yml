@@ -64,14 +64,14 @@ jobs:
           done
 
       - name: Upload APK artifacts
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: android-release
           path: build/app/outputs/flutter-apk/*.apk
           retention-days: 7
 
       - name: Upload APK size analysis
-        uses: actions/upload-artifact@v5
+        uses: actions/upload-artifact@v6
         with:
           name: apk-size-analysis
           path: apk_analysis
