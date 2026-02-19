@@ -53,7 +53,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  fake_cloud_firestore: ^4.0.0
+  fake_cloud_firestore: ^4.0.1
   firebase_auth_mocks: ^0.15.1
   firebase_core_platform_interface: ^6.0.0
   flutter_lints: ^6.0.0
