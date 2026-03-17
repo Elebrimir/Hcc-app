@@ -269,10 +269,10 @@ packages:
     dependency: "direct dev"
     description:
       name: fake_cloud_firestore
-      sha256: "1e1f1d79139277069577cc80bec2930ee4d3fcc0f4a8936549160d41c3858ec0"
+      sha256: e527f18d4bb7bc329f499d99c3562f98f0cb55e5b2e92e11d9555b48e9f0fe1c
       url: "https://pub.dev"
     source: hosted
-    version: "4.0.1"
+    version: "4.0.2+1"
   fake_firebase_security_rules:
     dependency: transitive
     description:
@@ -821,14 +821,6 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.5.0"
-  quiver:
-    dependency: transitive
-    description:
-      name: quiver
-      sha256: ea0b925899e64ecdfbf9c7becb60d5b50e706ade44a85b2363be2a22d88117d2
-      url: "https://pub.dev"
-    source: hosted
-    version: "3.2.2"
   rx:
     dependency: transitive
     description:
