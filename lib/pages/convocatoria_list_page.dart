@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:hcc_app/providers/convocatoria_provider.dart';
 import 'package:hcc_app/pages/create_convocatoria_page.dart';
-
+import 'package:hcc_app/pages/convocatoria_details_page.dart';
 import 'package:intl/intl.dart';
 
 class ConvocatoriaListPage extends StatefulWidget {
@@ -54,7 +54,15 @@ class _ConvocatoriaListPageState extends State<ConvocatoriaListPage> {
                       ),
                       isThreeLine: true,
                       onTap: () {
-                        // TODO: Navigate to details page
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder:
+                                (context) => ConvocatoriaDetailsPage(
+                                  convocatoria: convocatoria,
+                                ),
+                          ),
+                        );
                       },
                     ),
                   );

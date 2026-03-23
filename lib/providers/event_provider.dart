@@ -8,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hcc_app/models/event_model.dart';
 
 class EventProvider extends ChangeNotifier {
-  final FirebaseFirestore _db = FirebaseFirestore.instance;
+  final FirebaseFirestore _db;
   late StreamSubscription _eventsSubscription;
 
   List<Event> _events = [];
@@ -17,7 +17,8 @@ class EventProvider extends ChangeNotifier {
   List<Event> get events => _events;
   bool get isLoading => _isLoading;
 
-  EventProvider() {
+  EventProvider({FirebaseFirestore? firestore})
+    : _db = firestore ?? FirebaseFirestore.instance {
     _fetchEvents();
   }
 
@@ -68,6 +69,15 @@ class EventProvider extends ChangeNotifier {
       await _db.collection('events').doc(eventId).update(eventData);
     } catch (e) {
       debugPrint("Error en actualitzar l'esdeveniment: $e");
+    }
+  }
+
+  Future<void> deleteEvent(String eventId) async {
+    try {
+      await _db.collection('events').doc(eventId).delete();
+    } catch (e) {
+      debugPrint("Error en eliminar l'esdeveniment: $e");
+      rethrow;
     }
   }
 }

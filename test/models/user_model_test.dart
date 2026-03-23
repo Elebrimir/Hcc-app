@@ -112,5 +112,26 @@ void main() {
       expect(model.image, isNull);
       expect(model.createdAt, isNull);
     });
+
+    test('should create a UserModel from map', () {
+      final timestamp = Timestamp.now();
+      final data = {
+        'email': 'test@example.com',
+        'name': 'Test',
+        'lastname': 'User',
+        'role': 'member',
+        'image': 'test_image.jpg',
+        'created_at': timestamp,
+      };
+
+      final model = UserModel.fromMap(data);
+
+      expect(model.email, 'test@example.com');
+      expect(model.name, 'Test');
+      expect(model.lastname, 'User');
+      expect(model.role, 'member');
+      expect(model.image, 'test_image.jpg');
+      expect(model.createdAt, timestamp);
+    });
   });
 }

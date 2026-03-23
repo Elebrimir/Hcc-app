@@ -134,8 +134,10 @@ void main() {
       );
 
       expect(find.byType(TeamDisplayItem), findsNWidgets(2));
-      expect(find.text('Equipo A'), findsNWidgets(2));
-      expect(find.text('Equipo B'), findsNWidgets(2));
+      expect(find.text('Equipo A'), findsOneWidget);
+      expect(find.text('Equipo B'), findsOneWidget);
+      // Check for initials
+      expect(find.text('E'), findsNWidgets(2));
       // Check for some stats to ensure data is passed correctly
       expect(
         find.text('15'),
