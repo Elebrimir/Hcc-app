@@ -4,6 +4,7 @@
 
 - [Registro de Cambios](#registro-de-cambios)
   - [[No publicado]](#no-publicado)
+  - [[4.3.0] - 2026-03-23](#430---2026-03-23)
   - [[4.2.0] - 2025-12-14](#420---2025-12-14)
   - [[4.1.0] - 2025-12-12](#410---2025-12-12)
   - [[4.0.2] - 2025-12-02](#402---2025-12-02)
@@ -47,6 +48,109 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [No publicado]
+
+## [4.3.0] - 2026-03-23
+
+* build(deps): Bump actions/checkout from 5 to 6
+* build(deps): Bump actions/checkout from 5 to 6 (#183)
+* build(deps): Bump mockito from 5.5.1 to 5.6.1
+* build(deps): Bump mockito from 5.5.1 to 5.6.1 (#186)
+* build(deps): Bump build_runner from 2.10.3 to 2.10.4
+* build(deps): Bump build_runner from 2.10.3 to 2.10.4 (#185)
+* build(deps): Bump image_picker from 1.2.0 to 1.2.1
+* build(deps): Bump image_picker from 1.2.0 to 1.2.1 (#184)
+* feat: Add comprehensive unit tests for pages, models, and widgets, refactor test directory structure, and update dependencies.
+* feat: enhance notification service with timezone configuration and Android channels, and add dedicated tests for TeamPage and UserListPage.
+* Bump version to 3.0.1+23
+* feat: improve automated version bump workflow with PR checks, detailed changelog generation, and pre-commit integration
+* feat: improve automated version bump (#191)
+* Updating Android Gradle plugin.
+* feat: Configure Firebase Hosting for Flutter web, update project metadata, and simplify Firestore rules.
+* feat: Add shop page with product carousel and integrate it into the dashboard navigation.
+* (feat): Page Orders Dart (#192)
+* Remove pre-commit auto-commit action and broaden `git add` scope in version bump workflow.
+* (fix): build_action (#194)
+* ci: Add 'version-bump' label creation to workflow.
+* (fix): version_bump (#195)
+* feat: add 'automated' GitHub label to the version bump workflow.
+* (fix): version_bump (#196)
+* chore: bump version to 3.1.0+24
+* 🔖 Bump version to 3.1.0+24 (#197)
+* chore: bump version to 4.0.0+25
+* ci: specify Dart SDK version in version bump workflow
+* 🔖 Bump version to 4.0.0+25 (#198)
+* Merge branch 'main' into action/fix_version_bump_5
+* (fix): version_bump (#199)
+* chore: bump version to 4.0.1+26
+* 🔖 Bump version to 4.0.1+26 (#200)
+* (fic):pre_commit
+* (fix):pre_commit (#201)
+* (fix):action_bump
+* (fix):action_bump (#203)
+* chore: bump version to 4.0.2+27
+* 🔖 Bump version to 4.0.2+27 (#204)
+* build(deps): Bump actions/checkout from 4 to 6
+* build(deps): Bump actions/checkout from 4 to 6 (#208)
+* build(deps): Bump dart-lang/setup-dart from 1.0.0 to 1.7.1
+* build(deps): Bump dart-lang/setup-dart from 1.0.0 to 1.7.1 (#207)
+* feat: add uuid and direct main on pubspec
+* feat: Introduce convocation management with dedicated models, list and creation pages, and a provider.
+* test: add unit and widget tests for convocatoria models, providers, and pages.
+* 4.0 feat call players delegates (#206)
+* chore: bump version to 4.1.0+28
+* 🔖 Bump version to 4.1.0+28 (#210)
+* Añadir reglas para el modelo convocatorias
+* feat: Implementar admin side menu, actualizar app bar for drawer access, actualización visual para shop_page,team_page,user_list_page,
+* test: Add tests for ShopPage and AdminSideMenu, and update DashboardPage test with fake firestore and calendar improvements.
+* (feat): widget(AdminSiteMenu) (#212)
+* chore: bump version to 4.2.0+29
+* 🔖 Bump version to 4.2.0+29 (#213)
+* build(deps): Bump actions/upload-artifact from 5 to 6
+* build(deps): Bump actions/upload-artifact from 5 to 6 (#216)
+* build(deps): Bump actions/download-artifact from 6 to 7
+* build(deps): Bump actions/download-artifact from 6 to 7 (#214)
+* build(deps): Bump actions/cache from 4 to 5
+* build(deps): Bump actions/cache from 4 to 5 (#215)
+* build(deps): Bump firebase_core from 4.2.1 to 4.3.0
+* build(deps): Bump firebase_core from 4.2.1 to 4.3.0 (#219)
+* build(deps): Bump firebase_auth from 6.1.2 to 6.1.3
+* build(deps): Bump firebase_auth from 6.1.2 to 6.1.3 (#217)
+* build(deps): Bump cloud_firestore from 6.1.0 to 6.1.1
+* build(deps): Bump cloud_firestore from 6.1.0 to 6.1.1 (#218)
+* build(deps): Bump firebase_storage from 13.0.4 to 13.0.5
+* build(deps): Bump firebase_storage from 13.0.4 to 13.0.5 (#220)
+* build(deps): Bump build_runner from 2.10.4 to 2.11.1
+* build(deps): Bump build_runner from 2.10.4 to 2.11.1 (#231)
+* build(deps): Bump firebase_core from 4.3.0 to 4.4.0
+* build(deps): Bump firebase_core from 4.3.0 to 4.4.0 (#227)
+* build(deps): Bump cloud_firestore from 6.1.1 to 6.1.2
+* build(deps): Bump cloud_firestore from 6.1.1 to 6.1.2 (#228)
+* build(deps): Bump uuid from 4.5.2 to 4.5.3
+* build(deps): Bump uuid from 4.5.2 to 4.5.3 (#232)
+* build(deps): Bump actions/download-artifact from 7 to 8
+* build(deps): Bump actions/download-artifact from 7 to 8 (#233)
+* build(deps): Bump actions/upload-artifact from 6 to 7
+* build(deps): Bump actions/upload-artifact from 6 to 7 (#234)
+* build(deps): Bump fake_cloud_firestore from 4.0.0 to 4.0.1
+* build(deps): Bump fake_cloud_firestore from 4.0.0 to 4.0.1 (#221)
+* build(deps): Bump firebase_storage from 13.0.5 to 13.0.6
+* build(deps): Bump firebase_storage from 13.0.5 to 13.0.6 (#224)
+* build(deps): Bump firebase_auth from 6.1.3 to 6.1.4
+* build(deps): Bump firebase_auth from 6.1.3 to 6.1.4 (#225)
+* build(deps): Bump cloud_firestore from 6.1.2 to 6.1.3
+* build(deps): Bump cloud_firestore from 6.1.2 to 6.1.3 (#236)
+* build(deps): Bump build_runner from 2.11.1 to 2.12.2
+* build(deps): Bump build_runner from 2.11.1 to 2.12.2 (#235)
+* build(deps): Bump mockito from 5.6.1 to 5.6.3
+* build(deps): Bump mockito from 5.6.1 to 5.6.3 (#222)
+* build(deps): Bump fake_cloud_firestore from 4.0.1 to 4.0.2+1
+* build(deps): Bump fake_cloud_firestore from 4.0.1 to 4.0.2+1 (#238)
+* build(deps): Bump flutter_timezone from 5.0.1 to 5.0.2
+* build(deps): Bump flutter_timezone from 5.0.1 to 5.0.2 (#237)
+* build(deps): Bump build_runner from 2.12.2 to 2.13.1
+* build(deps): Bump build_runner from 2.12.2 to 2.13.1 (#239)
+* build(deps): Bump flutter_local_notifications from 19.5.0 to 20.1.0
+* build(deps): Bump flutter_local_notifications from 19.5.0 to 20.1.0 (#230)
 
 ## [4.2.0] - 2025-12-14
 
