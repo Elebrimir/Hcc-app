@@ -4,6 +4,7 @@
 
 - [Registro de Cambios](#registro-de-cambios)
   - [[No publicado]](#no-publicado)
+  - [[4.4.0] - 2026-03-23](#440---2026-03-23)
   - [[4.3.0] - 2026-03-23](#430---2026-03-23)
   - [[4.2.0] - 2025-12-14](#420---2025-12-14)
   - [[4.1.0] - 2025-12-12](#410---2025-12-12)
@@ -48,6 +49,11 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [No publicado]
+
+## [4.4.0] - 2026-03-23
+
+* feat: Update app icons for Android and iOS, refactor team page UI, and add convocatoria details page.
+* 4.0(feat): icons,pages,widgets,providers (#242)
 
 ## [4.3.0] - 2026-03-23
 
