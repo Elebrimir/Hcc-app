@@ -1,8 +1,10 @@
 // Copyright (c) 2025 HCC. All rights reserved.
 // Use of this source code is governed by an GNU GENERAL PUBLIC LICENSE
 // license that can be found in the LICENSE file.
+// ignore_for_file: invalid_use_of_visible_for_testing_member
 
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb, visibleForTesting;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
@@ -10,11 +12,23 @@ import 'package:timezone/timezone.dart' as tz;
 import 'package:timezone/data/latest.dart' as tz;
 import 'package:hcc_app/models/event_model.dart';
 import 'package:flutter_timezone/flutter_timezone.dart';
-import 'package:flutter/foundation.dart' show kIsWeb;
 
 class NotificationService {
-  static final FlutterLocalNotificationsPlugin
-  _flutterLocalNotificationsPlugin = FlutterLocalNotificationsPlugin();
+  static FlutterLocalNotificationsPlugin _flutterLocalNotificationsPlugin =
+      FlutterLocalNotificationsPlugin();
+
+  /// Only for use in tests. Allows injecting a mock plugin.
+  @visibleForTesting
+  static set pluginForTesting(FlutterLocalNotificationsPlugin plugin) =>
+      _flutterLocalNotificationsPlugin = plugin;
+
+  /// Handles a received notification response. Extracted for testability.
+  @visibleForTesting
+  static void handleNotificationResponse(NotificationResponse response) {
+    if (response.payload != null) {
+      debugPrint('Notificación recibida con payload: ${response.payload}');
+    }
+  }
 
   static Future<void> requestPermissions() async {
     if (kIsWeb) return;
@@ -48,12 +62,8 @@ class NotificationService {
         );
 
     await _flutterLocalNotificationsPlugin.initialize(
-      initializationSettings,
-      onDidReceiveNotificationResponse: (NotificationResponse response) {
-        if (response.payload != null) {
-          debugPrint('Notificación recibida con payload: ${response.payload}');
-        }
-      },
+      onDidReceiveNotificationResponse: handleNotificationResponse,
+      settings: initializationSettings,
     );
 
     // Crear el canal de notificación para Android
@@ -87,7 +97,6 @@ class NotificationService {
       event.startTime.subtract(reminderTime),
       tz.local,
     );
-
     // Validar que la notificación no sea para el pasado
     final now = tz.TZDateTime.now(tz.local);
     if (scheduledTime.isBefore(now)) {
@@ -123,14 +132,14 @@ class NotificationService {
 
     try {
       await _flutterLocalNotificationsPlugin.zonedSchedule(
-        notificationId,
-        event.title,
-        'Evento de HCC está a punto de empezar!',
-        scheduledTime,
-        platformDetails,
         androidScheduleMode: AndroidScheduleMode.exactAllowWhileIdle,
         matchDateTimeComponents: DateTimeComponents.dateAndTime,
         payload: event.id,
+        id: notificationId,
+        scheduledDate: scheduledTime,
+        notificationDetails: platformDetails,
+        title: event.title,
+        body: 'Evento de HCC está a punto de empezar!',
       );
       debugPrint('Notificación programada exitosamente para ${event.title}');
     } on PlatformException catch (e) {
@@ -139,14 +148,15 @@ class NotificationService {
         // En caso de que no se pueda programar la alarma exacta,
         // se intenta programar una menos precisa para evitar que la app falle.
         await _flutterLocalNotificationsPlugin.zonedSchedule(
-          notificationId,
-          event.title,
-          'Evento de HCC está a punto de empezar! (Recordatorio no exacto)',
-          scheduledTime,
-          platformDetails,
           androidScheduleMode: AndroidScheduleMode.inexact,
           matchDateTimeComponents: DateTimeComponents.dateAndTime,
           payload: event.id,
+          id: notificationId,
+          title: event.title,
+          body:
+              'Evento de HCC está a punto de empezar! (Recordatorio no exacto)',
+          scheduledDate: scheduledTime,
+          notificationDetails: platformDetails,
         );
         debugPrint(
           'Notificación programada en modo inexacto para ${event.title}',
@@ -160,6 +170,6 @@ class NotificationService {
   // 3. Cancela una notificación
   static Future<void> cancelNotification(String eventId) async {
     final int notificationId = eventId.hashCode;
-    await _flutterLocalNotificationsPlugin.cancel(notificationId);
+    await _flutterLocalNotificationsPlugin.cancel(id: notificationId);
   }
 }
