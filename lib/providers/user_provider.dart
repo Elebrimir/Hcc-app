@@ -10,6 +10,10 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:hcc_app/models/user_model.dart';
 
 class UserProvider extends ChangeNotifier {
+  final FirebaseAuth _auth;
+  final FirebaseFirestore _firestore;
+  final FirebaseStorage _storage;
+
   User? _firebaseUser;
   UserModel? _userModel;
   bool _isUploadingImage = false;
@@ -20,28 +24,26 @@ class UserProvider extends ChangeNotifier {
   bool get isUploadingImage => _isUploadingImage;
   bool get isSavingProfile => _isSavingProfile;
 
-  UserProvider() {
+  UserProvider({
+    FirebaseAuth? auth,
+    FirebaseFirestore? firestore,
+    FirebaseStorage? storage,
+  }) : _auth = auth ?? FirebaseAuth.instance,
+       _firestore = firestore ?? FirebaseFirestore.instance,
+       _storage = storage ?? FirebaseStorage.instance {
     _initializeUser();
   }
 
-  Future<void> initializeUser({
-    User? mockUser,
-    FirebaseFirestore? mockFirestore,
-  }) async {
-    await _initializeUser(mockUser: mockUser, mockFirestore: mockFirestore);
+  Future<void> initializeUser() async {
+    // This method is now mostly redundant but kept for compatibility if needed.
+    // The initialization happens in the constructor.
   }
 
-  Future<void> _initializeUser({
-    User? mockUser,
-    FirebaseFirestore? mockFirestore,
-  }) async {
-    final authInstance = FirebaseAuth.instance;
-    final firestoreInstance = mockFirestore ?? FirebaseFirestore.instance;
-
-    authInstance.authStateChanges().listen((User? user) async {
-      _firebaseUser = mockUser ?? user;
+  void _initializeUser() {
+    _auth.authStateChanges().listen((User? user) async {
+      _firebaseUser = user;
       if (_firebaseUser != null) {
-        await _loadUserData(_firebaseUser!, firestoreInstance);
+        await _loadUserData(_firebaseUser!);
       } else {
         _userModel = null;
       }
@@ -49,13 +51,9 @@ class UserProvider extends ChangeNotifier {
     });
   }
 
-  Future<void> _loadUserData(
-    User user,
-    FirebaseFirestore firestoreInstance,
-  ) async {
+  Future<void> _loadUserData(User user) async {
     try {
-      final snapshot =
-          await firestoreInstance.collection('users').doc(user.uid).get();
+      final snapshot = await _firestore.collection('users').doc(user.uid).get();
 
       if (snapshot.exists) {
         _userModel = UserModel.fromFirestore(snapshot, null);
@@ -70,7 +68,7 @@ class UserProvider extends ChangeNotifier {
   }
 
   Future<void> signOut() async {
-    await FirebaseAuth.instance.signOut();
+    await _auth.signOut();
     _firebaseUser = null;
     _userModel = null;
     _isUploadingImage = false;
@@ -92,7 +90,7 @@ class UserProvider extends ChangeNotifier {
       final String userId = _firebaseUser!.uid;
       final String fileName =
           '${DateTime.now().millisecondsSinceEpoch}_${imageFile.path.split('/').last}';
-      final Reference storageRef = FirebaseStorage.instance
+      final Reference storageRef = _storage
           .ref()
           .child('profile_images')
           .child(userId)
@@ -101,9 +99,7 @@ class UserProvider extends ChangeNotifier {
       UploadTask uploadTask = storageRef.putFile(imageFile);
       TaskSnapshot snapshot = await uploadTask;
       String downloadUrl = await snapshot.ref.getDownloadURL();
-      DocumentReference userDocRef = FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId);
+      DocumentReference userDocRef = _firestore.collection('users').doc(userId);
       await userDocRef.update({'image': downloadUrl});
 
       if (_userModel != null) {
@@ -116,7 +112,7 @@ class UserProvider extends ChangeNotifier {
           image: downloadUrl,
         );
       } else {
-        await _loadUserData(_firebaseUser!, FirebaseFirestore.instance);
+        await _loadUserData(_firebaseUser!);
       }
 
       success = true;
@@ -149,7 +145,7 @@ class UserProvider extends ChangeNotifier {
     bool success = false;
     try {
       final String userId = _firebaseUser!.uid;
-      final DocumentReference userDocRef = FirebaseFirestore.instance
+      final DocumentReference userDocRef = _firestore
           .collection('users')
           .doc(userId);
 
@@ -170,7 +166,7 @@ class UserProvider extends ChangeNotifier {
           lastname: lastname,
         );
       } else {
-        await _loadUserData(_firebaseUser!, FirebaseFirestore.instance);
+        await _loadUserData(_firebaseUser!);
       }
 
       success = true;

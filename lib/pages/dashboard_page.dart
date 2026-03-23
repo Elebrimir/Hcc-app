@@ -47,8 +47,8 @@ class _DashboardPageState extends State<DashboardPage> {
       ),
       ShopPage(firestore: widget.firestore),
       const CalendarPage(),
-      const TeamPage(),
       const ConvocatoriaListPage(),
+      const TeamPage(),
       const ProfilePage(),
     ];
   }
@@ -93,7 +93,7 @@ class _DashboardPageState extends State<DashboardPage> {
         drawer: AdminSideMenu(firestore: widget.firestore),
         body: _pages[_selectedIndex],
         floatingActionButton:
-            _selectedIndex == 1
+            _selectedIndex == 2
                 ? FloatingActionButton(
                   onPressed: () {
                     _showEventFormModal(context);
@@ -146,7 +146,7 @@ class _DashboardPageState extends State<DashboardPage> {
       'Desembre',
     ];
     final dias = [
-      'Dillluns',
+      'Dilluns',
       'Dimarts',
       'Dimecres',
       'Dijous',

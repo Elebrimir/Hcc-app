@@ -92,6 +92,9 @@ class MockEventProvider extends ChangeNotifier implements EventProvider {
     String eventId,
     Map<String, dynamic> eventData,
   ) async {}
+
+  @override
+  Future<void> deleteEvent(String eventId) async {}
 }
 
 void main() {

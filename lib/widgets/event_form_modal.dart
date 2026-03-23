@@ -166,6 +166,45 @@ class _EventFormModalState extends State<EventFormModal> {
     }
   }
 
+  void _deleteEvent() async {
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Eliminar Esdeveniment'),
+            content: const Text(
+              'Estàs segur que vols eliminar aquest esdeveniment?',
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text('Cancel·lar'),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                style: TextButton.styleFrom(foregroundColor: Colors.red),
+                child: const Text('Eliminar'),
+              ),
+            ],
+          ),
+    );
+
+    if (confirm == true && mounted) {
+      final eventProvider = context.read<EventProvider>();
+      try {
+        await eventProvider.deleteEvent(widget.event!.id);
+        await NotificationService.cancelNotification(widget.event!.id);
+        if (mounted) Navigator.of(context).pop();
+      } catch (e) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Error al eliminar l\'esdeveniment: $e')),
+          );
+        }
+      }
+    }
+  }
+
   Future<void> _selectRecurrenceEndDate() async {
     final selectedDate = await showDatePicker(
       context: context,
@@ -258,6 +297,16 @@ class _EventFormModalState extends State<EventFormModal> {
                 ),
               ),
               const SizedBox(height: 10),
+              TextFormField(
+                controller: _descriptionController,
+                style: const TextStyle(color: Colors.white),
+                maxLines: 3,
+                decoration: const InputDecoration(
+                  labelText: 'Descripció',
+                  labelStyle: TextStyle(color: Colors.grey),
+                ),
+              ),
+              const SizedBox(height: 10),
               Row(
                 children: [
                   Expanded(
@@ -308,6 +357,14 @@ class _EventFormModalState extends State<EventFormModal> {
                 onPressed: _saveForm,
                 child: Text(widget.event == null ? 'Crear' : 'Guardar Canvis'),
               ),
+              if (widget.event != null) ...[
+                const SizedBox(height: 10),
+                TextButton(
+                  onPressed: _deleteEvent,
+                  style: TextButton.styleFrom(foregroundColor: Colors.red),
+                  child: const Text('Eliminar Esdeveniment'),
+                ),
+              ],
               const SizedBox(height: 20),
             ],
           ),

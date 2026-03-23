@@ -65,173 +65,99 @@ class TeamDisplayItem extends StatelessWidget {
   Widget build(BuildContext context) {
     return ResponsiveContainer(
       child: Card(
-        margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 6.0),
-        elevation: 3.0,
+        margin: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+        elevation: 4.0,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         clipBehavior: Clip.antiAlias,
         child: Padding(
-          padding: const EdgeInsets.all(12.0),
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.center,
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
             children: [
-              CircleAvatar(
-                radius: 40,
-                backgroundColor:
-                    team.image == null
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : null,
-                backgroundImage:
-                    (team.image != null && team.image!.isNotEmpty)
-                        ? NetworkImage(team.image!)
-                        : null,
-                child:
-                    (team.image == null)
-                        ? Text(
-                          _getName(team),
-                          style: TextStyle(
-                            fontSize: 18,
+              Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  CircleAvatar(
+                    radius: 35,
+                    backgroundColor:
+                        team.image == null
+                            ? Theme.of(context).colorScheme.primaryContainer
+                            : null,
+                    backgroundImage:
+                        (team.image != null && team.image!.isNotEmpty)
+                            ? NetworkImage(team.image!)
+                            : null,
+                    child:
+                        (team.image == null || team.image!.isEmpty)
+                            ? Text(
+                              (team.name ?? 'T').substring(0, 1).toUpperCase(),
+                              style: TextStyle(
+                                fontSize: 24,
+                                fontWeight: FontWeight.bold,
+                                color:
+                                    Theme.of(
+                                      context,
+                                    ).colorScheme.onPrimaryContainer,
+                              ),
+                            )
+                            : null,
+                  ),
+                  const SizedBox(width: 16.0),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          team.name ?? 'Sense nom',
+                          style: Theme.of(
+                            context,
+                          ).textTheme.titleLarge?.copyWith(
                             fontWeight: FontWeight.bold,
-                            color:
-                                Theme.of(
-                                  context,
-                                ).colorScheme.onPrimaryContainer,
+                            color: Colors.red[900],
                           ),
-                        )
-                        : null,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                        const SizedBox(height: 4.0),
+                        if (team.coaches != null &&
+                            team.coaches!.isNotEmpty) ...[
+                          Text(
+                            'Entrenadors: ${team.coaches!.map((coach) => coach.name).join(', ')}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                        if (team.delegates != null &&
+                            team.delegates!.isNotEmpty) ...[
+                          Text(
+                            'Delegats: ${team.delegates!.map((delegate) => delegate.name).join(', ')}',
+                            style: Theme.of(context).textTheme.bodySmall,
+                          ),
+                        ],
+                      ],
+                    ),
+                  ),
+                ],
               ),
-              const SizedBox(width: 16.0),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      _getName(team),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    if (team.coaches != null) ...[
-                      const SizedBox(height: 50.0),
-                      Text(
-                        'Entrenadors: ${team.coaches!.map((coach) => coach.name).join(', ')}',
-                      ),
-                    ],
-                    if (team.delegates != null) ...[
-                      const SizedBox(height: 5.0),
-                      Text(
-                        'Delegats: ${team.delegates!.map((delegate) => delegate.name).join(', ')}',
-                      ),
-                    ],
-                  ],
-                ),
-              ),
-              const SizedBox(width: 1.0),
-              Expanded(
-                flex: 2,
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'PJ',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          '${team.games}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 2.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'PG',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          '${team.win}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 2.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'PE',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          '${team.draw}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 2.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'PP',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          '${team.lose}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 2.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'GF',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          '${team.goals}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 2.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'GC',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          '${team.goalsAgainst}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                    const SizedBox(width: 2.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.center,
-                      children: [
-                        Text(
-                          'DG',
-                          style: Theme.of(context).textTheme.bodySmall,
-                        ),
-                        Text(
-                          '${team.goalDifference}',
-                          style: Theme.of(context).textTheme.bodyLarge,
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
+              const Divider(height: 24),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  _buildStatItem(context, 'PJ', (team.games ?? 0).toString()),
+                  _buildStatItem(context, 'PG', (team.win ?? 0).toString()),
+                  _buildStatItem(context, 'PE', (team.draw ?? 0).toString()),
+                  _buildStatItem(context, 'PP', (team.lose ?? 0).toString()),
+                  _buildStatItem(context, 'GF', (team.goals ?? 0).toString()),
+                  _buildStatItem(
+                    context,
+                    'GC',
+                    (team.goalsAgainst ?? 0).toString(),
+                  ),
+                  _buildStatItem(
+                    context,
+                    'DG',
+                    (team.goalDifference ?? 0).toString(),
+                    isHighlight: true,
+                  ),
+                ],
               ),
             ],
           ),
@@ -240,7 +166,30 @@ class TeamDisplayItem extends StatelessWidget {
     );
   }
 
-  String _getName(TeamModel team) {
-    return '${team.name}';
+  Widget _buildStatItem(
+    BuildContext context,
+    String label,
+    String value, {
+    bool isHighlight = false,
+  }) {
+    return Column(
+      children: [
+        Text(
+          label,
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: Colors.grey[600],
+            fontWeight: FontWeight.bold,
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: Theme.of(context).textTheme.titleMedium?.copyWith(
+            fontWeight: isHighlight ? FontWeight.bold : FontWeight.normal,
+            color: isHighlight ? Colors.red[900] : Colors.black87,
+          ),
+        ),
+      ],
+    );
   }
 }
