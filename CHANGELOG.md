@@ -4,6 +4,7 @@
 
 - [Registro de Cambios](#registro-de-cambios)
   - [[No publicado]](#no-publicado)
+  - [[4.5.0] - 2026-03-24](#450---2026-03-24)
   - [[4.4.0] - 2026-03-23](#440---2026-03-23)
   - [[4.3.0] - 2026-03-23](#430---2026-03-23)
   - [[4.2.0] - 2025-12-14](#420---2025-12-14)
@@ -49,6 +50,11 @@ El formato está basado en [Keep a Changelog](https://keepachangelog.com/es/1.0.
 y este proyecto adhiere a [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## [No publicado]
+
+## [4.5.0] - 2026-03-24
+
+* feat(convocatoria): improve player management and redesign UI
+* feat(convocatoria): improve player management and redesign UI (#245)
 
 ## [4.4.0] - 2026-03-23
 
