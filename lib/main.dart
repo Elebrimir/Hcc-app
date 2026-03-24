@@ -14,6 +14,9 @@ import 'package:hcc_app/providers/convocatoria_provider.dart';
 import 'package:hcc_app/auth/auth_wrapper.dart';
 import 'package:hcc_app/firebase_options.dart';
 
+import 'package:hcc_app/providers/team_provider.dart';
+import 'package:hcc_app/providers/player_provider.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp(options: DefaultFirebaseOptions.currentPlatform);
@@ -26,6 +29,8 @@ Future<void> main() async {
         ChangeNotifierProvider(create: (_) => UserProvider()),
         ChangeNotifierProvider(create: (_) => EventProvider()),
         ChangeNotifierProvider(create: (_) => ConvocatoriaProvider()),
+        ChangeNotifierProvider(create: (_) => TeamProvider()),
+        ChangeNotifierProvider(create: (_) => PlayerProvider()),
       ],
       child: const MyApp(),
     ),

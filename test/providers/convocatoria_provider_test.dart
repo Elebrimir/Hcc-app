@@ -1,4 +1,5 @@
 import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/models/convocatoria_model.dart';
 import 'package:hcc_app/models/event_model.dart';
@@ -35,6 +36,8 @@ void main() {
           teamId: 'team1',
           teamName: 'Team A',
           event: event,
+          eventTitle: event.title,
+          eventStartTime: Timestamp.fromDate(event.startTime),
           players: [player],
           delegates: [],
         );

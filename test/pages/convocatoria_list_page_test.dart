@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/models/convocatoria_model.dart';
 import 'package:hcc_app/pages/convocatoria_list_page.dart';
 import 'package:hcc_app/providers/convocatoria_provider.dart';
+import 'package:hcc_app/models/event_model.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
@@ -30,7 +31,9 @@ class MockConvocatoriaProvider extends ChangeNotifier
   Future<void> createConvocatoria({
     required String teamId,
     required String teamName,
-    required event,
+    required Event event,
+    String? eventTitle,
+    Timestamp? eventStartTime,
     required List<ConvokedUser> players,
     required List<ConvokedUser> delegates,
   }) async {}
@@ -83,6 +86,8 @@ void main() {
         teamId: 't1',
         teamName: 'Team Test',
         eventId: 'e1',
+        eventTitle: 'Match A',
+        eventStartTime: Timestamp.now(),
         players: [],
         delegates: [],
         createdAt: Timestamp.now(),
@@ -96,8 +101,8 @@ void main() {
       await tester.pumpWidget(createTestableWidget(mockProvider));
       await tester.pumpAndSettle();
 
-      expect(find.text('Team Test'), findsOneWidget);
-      expect(find.byType(ListTile), findsOneWidget);
+      expect(find.text('Match A'), findsOneWidget);
+      expect(find.byType(Card), findsOneWidget);
     });
 
     testWidgets('FAB should navigate to CreateConvocatoriaPage', (

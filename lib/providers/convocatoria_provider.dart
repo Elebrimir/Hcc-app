@@ -19,6 +19,8 @@ class ConvocatoriaProvider extends ChangeNotifier {
     required String teamId,
     required String teamName,
     required Event event,
+    required String? eventTitle,
+    required Timestamp? eventStartTime,
     required List<ConvokedUser> players,
     required List<ConvokedUser> delegates,
   }) async {
@@ -38,6 +40,8 @@ class ConvocatoriaProvider extends ChangeNotifier {
         teamId: teamId,
         teamName: teamName,
         eventId: eventRef.id,
+        eventTitle: eventTitle,
+        eventStartTime: eventStartTime,
         players: players,
         delegates: delegates,
         createdAt: Timestamp.now(),

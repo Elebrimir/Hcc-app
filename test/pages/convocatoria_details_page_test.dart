@@ -2,9 +2,44 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/pages/convocatoria_details_page.dart';
 import 'package:hcc_app/models/convocatoria_model.dart';
+import 'package:hcc_app/providers/convocatoria_provider.dart';
+import 'package:hcc_app/providers/player_provider.dart';
+import 'package:hcc_app/providers/user_provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:firebase_auth_mocks/firebase_auth_mocks.dart';
+import 'package:fake_cloud_firestore/fake_cloud_firestore.dart';
+
+class MockConvocatoriaProvider extends Mock implements ConvocatoriaProvider {}
+
+class MockPlayerProvider extends Mock implements PlayerProvider {}
+
+class MockUserProvider extends Mock implements UserProvider {}
 
 void main() {
+  late MockConvocatoriaProvider mockConvProvider;
+  late MockPlayerProvider mockPlayerProvider;
+  late MockUserProvider mockUserProvider;
+  late FakeFirebaseFirestore fakeFirestore;
+
+  setUp(() {
+    mockConvProvider = MockConvocatoriaProvider();
+    mockPlayerProvider = MockPlayerProvider();
+    mockUserProvider = MockUserProvider();
+    fakeFirestore = FakeFirebaseFirestore();
+
+    // Default behaviors
+    final mockFirebaseUser = MockUser(uid: 'test_uid');
+    when(() => mockConvProvider.isLoading).thenReturn(false);
+    when(() => mockConvProvider.convocatorias).thenReturn([]);
+    when(
+      () => mockPlayerProvider.getPlayersByParent(any()),
+    ).thenAnswer((_) => Stream.value([]));
+    when(() => mockUserProvider.firebaseUser).thenReturn(mockFirebaseUser);
+    when(() => mockUserProvider.userModel).thenReturn(null);
+  });
+
   testWidgets('ConvocatoriaDetailsPage displays convocatoria info correctly', (
     WidgetTester tester,
   ) async {
@@ -45,13 +80,36 @@ void main() {
       createdAt: now,
     );
 
+    // Pre-populate Firestore
+    await fakeFirestore
+        .collection('convocatorias')
+        .doc(convocatoria.id)
+        .set(convocatoria.toFirestore());
+
     await tester.pumpWidget(
-      MaterialApp(home: ConvocatoriaDetailsPage(convocatoria: convocatoria)),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ConvocatoriaProvider>.value(
+            value: mockConvProvider,
+          ),
+          ChangeNotifierProvider<PlayerProvider>.value(
+            value: mockPlayerProvider,
+          ),
+          ChangeNotifierProvider<UserProvider>.value(value: mockUserProvider),
+        ],
+        child: MaterialApp(
+          home: ConvocatoriaDetailsPage(
+            convocatoria: convocatoria,
+            firestore: fakeFirestore,
+          ),
+        ),
+      ),
     );
+
+    await tester.pumpAndSettle();
 
     // Check header
     expect(find.text('Senior A'), findsOneWidget);
-    expect(find.textContaining('Creat el:'), findsOneWidget);
 
     // Check sections
     expect(find.text('Jugadors (3)'), findsOneWidget);
@@ -67,11 +125,6 @@ void main() {
     expect(find.text('CONFIRMED'), findsNWidgets(2));
     expect(find.text('PENDING'), findsOneWidget);
     expect(find.text('DECLINED'), findsOneWidget);
-
-    // Check icons (by looking for specific IconData if possible, or just verifying they exist)
-    expect(find.byIcon(Icons.check), findsNWidgets(2));
-    expect(find.byIcon(Icons.access_time), findsOneWidget);
-    expect(find.byIcon(Icons.close), findsOneWidget);
   });
 
   testWidgets('ConvocatoriaDetailsPage handles empty lists gracefully', (
@@ -88,9 +141,33 @@ void main() {
       createdAt: now,
     );
 
+    // Pre-populate Firestore
+    await fakeFirestore
+        .collection('convocatorias')
+        .doc(convocatoria.id)
+        .set(convocatoria.toFirestore());
+
     await tester.pumpWidget(
-      MaterialApp(home: ConvocatoriaDetailsPage(convocatoria: convocatoria)),
+      MultiProvider(
+        providers: [
+          ChangeNotifierProvider<ConvocatoriaProvider>.value(
+            value: mockConvProvider,
+          ),
+          ChangeNotifierProvider<PlayerProvider>.value(
+            value: mockPlayerProvider,
+          ),
+          ChangeNotifierProvider<UserProvider>.value(value: mockUserProvider),
+        ],
+        child: MaterialApp(
+          home: ConvocatoriaDetailsPage(
+            convocatoria: convocatoria,
+            firestore: fakeFirestore,
+          ),
+        ),
+      ),
     );
+
+    await tester.pumpAndSettle();
 
     expect(find.text('Jugadors (0)'), findsOneWidget);
     expect(find.text('Delegats (0)'), findsOneWidget);

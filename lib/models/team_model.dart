@@ -6,6 +6,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hcc_app/models/user_model.dart';
 
 class TeamModel {
+  final String? id;
   final String? name;
   final String? category;
   final String? image;
@@ -24,6 +25,7 @@ class TeamModel {
   final Timestamp? createdAt;
 
   TeamModel({
+    this.id,
     this.name,
     this.category,
     this.image,
@@ -90,6 +92,7 @@ class TeamModel {
         [];
 
     return TeamModel(
+      id: snapshot.id,
       name: data?['name'],
       category: data?['category'],
       image: data?['image'],

@@ -9,6 +9,8 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:hcc_app/models/user_model.dart';
 import 'package:hcc_app/pages/profile_page.dart';
 import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/providers/player_provider.dart';
+import 'package:hcc_app/models/player_model.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:provider/provider.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -21,8 +23,15 @@ class MockUserProvider extends Mock
     with ChangeNotifier
     implements UserProvider {}
 
+class MockPlayerProvider extends Mock
+    with ChangeNotifier
+    implements PlayerProvider {}
+
+class MockPlayerModel extends Mock implements PlayerModel {}
+
 void main() {
   late MockUserProvider mockUserProvider;
+  late MockPlayerProvider mockPlayerProvider;
   late MockUser mockFirebaseUser;
   late UserModel testUserModel;
 
@@ -32,6 +41,7 @@ void main() {
 
   setUp(() {
     mockUserProvider = MockUserProvider();
+    mockPlayerProvider = MockPlayerProvider();
     mockFirebaseUser = MockUser();
     when(() => mockFirebaseUser.uid).thenReturn('test_uid');
     when(() => mockFirebaseUser.email).thenReturn('test@example.com');
@@ -59,11 +69,19 @@ void main() {
         lastname: any(named: 'lastname'),
       ),
     ).thenAnswer((_) async => true);
+
+    // Stub PlayerProvider
+    when(
+      () => mockPlayerProvider.getPlayersByParent(any()),
+    ).thenAnswer((_) => Stream.value([]));
   });
 
   Widget createWidgetUnderTest() {
-    return ChangeNotifierProvider<UserProvider>.value(
-      value: mockUserProvider,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider<UserProvider>.value(value: mockUserProvider),
+        ChangeNotifierProvider<PlayerProvider>.value(value: mockPlayerProvider),
+      ],
       child: MaterialApp(home: Scaffold(body: ProfilePage())),
     );
   }
