@@ -7,6 +7,11 @@ import 'package:flutter/material.dart';
 import 'package:hcc_app/models/user_model.dart';
 import 'package:hcc_app/providers/user_provider.dart';
 import 'package:hcc_app/utils/responsive_container.dart';
+import 'package:hcc_app/models/player_model.dart';
+import 'package:hcc_app/models/team_model.dart';
+import 'package:hcc_app/providers/player_provider.dart';
+import 'package:hcc_app/providers/team_provider.dart';
+import 'package:hcc_app/widgets/player_form_modal.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 
@@ -289,7 +294,228 @@ class _ProfilePageState extends State<ProfilePage> {
                   )
                   : const Text('Desa canvis'),
         ),
+        const SizedBox(height: 40),
+        const Divider(),
+        const SizedBox(height: 20),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text(
+              'Els meus jugadors/es',
+              style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.bold,
+                color: Colors.red[900],
+              ),
+            ),
+            IconButton(
+              icon: const Icon(Icons.add_circle, color: Colors.green),
+              onPressed: () {
+                showModalBottomSheet(
+                  context: context,
+                  isScrollControlled: true,
+                  backgroundColor: Colors.transparent,
+                  builder: (context) => const PlayerFormModal(),
+                );
+              },
+            ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Consumer<PlayerProvider>(
+          builder: (context, playerProvider, child) {
+            if (firebaseUser == null) return const SizedBox.shrink();
+
+            return StreamBuilder<List<PlayerModel>>(
+              stream: playerProvider.getPlayersByParent(firebaseUser.uid),
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
+                final players = snapshot.data ?? [];
+                if (players.isEmpty) {
+                  return const Text(
+                    'No tens cap jugador/a vinculat encara.',
+                    style: TextStyle(fontStyle: FontStyle.italic),
+                  );
+                }
+                return ListView.separated(
+                  shrinkWrap: true,
+                  physics: const NeverScrollableScrollPhysics(),
+                  itemCount: players.length,
+                  separatorBuilder: (context, index) => const Divider(),
+                  itemBuilder: (context, index) {
+                    final player = players[index];
+                    return ListTile(
+                      leading: CircleAvatar(
+                        backgroundColor: Colors.red[100],
+                        child: Text(
+                          (player.name ?? 'J').substring(0, 1).toUpperCase(),
+                          style: TextStyle(color: Colors.red[900]),
+                        ),
+                      ),
+                      title: Text(
+                        player.name ?? 'Sense nom',
+                        style: const TextStyle(fontWeight: FontWeight.bold),
+                      ),
+                      subtitle: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(player.category ?? 'Sense categoria'),
+                          if (player.teamIds != null &&
+                              player.teamIds!.isNotEmpty)
+                            Text(
+                              'Equips: ${player.teamIds!.length}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                color: Colors.blue,
+                              ),
+                            ),
+                        ],
+                      ),
+                      trailing: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          if (userModel.role == 'Admin' ||
+                              userModel.role == 'Coach' ||
+                              userModel.role == 'Delegate')
+                            IconButton(
+                              icon: const Icon(
+                                Icons.group_add,
+                                color: Colors.blue,
+                              ),
+                              onPressed:
+                                  () => _showTeamAssignmentDialog(
+                                    context,
+                                    player,
+                                  ),
+                              tooltip: 'Assignar a equips',
+                            ),
+                          IconButton(
+                            icon: const Icon(
+                              Icons.delete_outline,
+                              color: Colors.red,
+                            ),
+                            onPressed:
+                                () => _confirmDeletePlayer(context, player),
+                            tooltip: 'Eliminar jugador',
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                );
+              },
+            );
+          },
+        ),
+        const SizedBox(height: 50),
       ],
+    );
+  }
+
+  void _showTeamAssignmentDialog(BuildContext context, PlayerModel player) {
+    final teamProvider = Provider.of<TeamProvider>(context, listen: false);
+    final playerProvider = Provider.of<PlayerProvider>(context, listen: false);
+    List<String> selectedTeamIds = List.from(player.teamIds ?? []);
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, setDialogState) {
+            return AlertDialog(
+              title: Text('Assignar ${player.name} a equips'),
+              content: SizedBox(
+                width: double.maxFinite,
+                child: StreamBuilder<List<TeamModel>>(
+                  stream: teamProvider.getTeams(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+                    final teams = snapshot.data ?? [];
+                    if (teams.isEmpty) {
+                      return const Text('No hi ha equips disponibles.');
+                    }
+                    return ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: teams.length,
+                      itemBuilder: (context, index) {
+                        final team = teams[index];
+
+                        return CheckboxListTile(
+                          title: Text(team.name ?? 'Sense nom'),
+                          subtitle: Text(team.category ?? ''),
+                          value: selectedTeamIds.contains(team.id),
+                          onChanged: (bool? value) {
+                            setDialogState(() {
+                              if (value == true && team.id != null) {
+                                selectedTeamIds.add(team.id!);
+                              } else {
+                                selectedTeamIds.remove(team.id);
+                              }
+                            });
+                          },
+                        );
+                      },
+                    );
+                  },
+                ),
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: const Text('CANCEL·LAR'),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await playerProvider.updatePlayerTeams(
+                      player.id!,
+                      selectedTeamIds,
+                    );
+                    if (context.mounted) Navigator.pop(context);
+                  },
+                  child: const Text('GUARDAR'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+    );
+  }
+
+  void _confirmDeletePlayer(BuildContext context, PlayerModel player) {
+    showDialog(
+      context: context,
+      builder:
+          (context) => AlertDialog(
+            title: const Text('Eliminar jugador?'),
+            content: Text('Estàs segur que vols eliminar a ${player.name}?'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('CANCEL·LAR'),
+              ),
+              TextButton(
+                onPressed: () async {
+                  final playerProvider = Provider.of<PlayerProvider>(
+                    context,
+                    listen: false,
+                  );
+                  await playerProvider.deletePlayer(player.id!);
+                  if (context.mounted) Navigator.pop(context);
+                },
+                child: const Text(
+                  'ELIMINAR',
+                  style: TextStyle(color: Colors.red),
+                ),
+              ),
+            ],
+          ),
     );
   }
 }

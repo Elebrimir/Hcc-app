@@ -6,6 +6,9 @@ import 'package:hcc_app/models/convocatoria_model.dart';
 import 'package:hcc_app/models/event_model.dart';
 import 'package:hcc_app/providers/convocatoria_provider.dart';
 import 'package:uuid/uuid.dart';
+import 'package:hcc_app/providers/player_provider.dart';
+import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/models/player_model.dart';
 
 class CreateConvocatoriaPage extends StatefulWidget {
   final FirebaseFirestore? firestore;
@@ -148,86 +151,126 @@ class _CreateConvocatoriaPageState extends State<CreateConvocatoriaPage> {
   }
 
   Widget _buildPlayerSelectionStep() {
-    if (_selectedTeam == null) {
+    if (_selectedTeam == null || _selectedTeamId == null) {
       return const Text('Si us plau, selecciona un equip primer.');
     }
 
-    final players = _selectedTeam!.players ?? [];
+    final playerProvider = Provider.of<PlayerProvider>(context, listen: false);
+    final adultPlayers = _selectedTeam!.players ?? [];
     final delegates = _selectedTeam!.delegates ?? [];
 
-    if (players.isEmpty && delegates.isEmpty) {
-      return const Text('Aquest equip no té jugadors ni delegats assignats.');
-    }
+    return StreamBuilder<List<PlayerModel>>(
+      stream: playerProvider.getPlayersByTeam(_selectedTeamId!),
+      builder: (context, snapshot) {
+        final childPlayers = snapshot.data ?? [];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (players.isNotEmpty) ...[
-          const Text(
-            'Jugadors',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          ...players.map((player) {
-            final isSelected = _selectedPlayers.any(
-              (p) => p.userId == player.email,
-            ); // Using email as ID for now as UserModel doesn't have ID
-            return CheckboxListTile(
-              title: Text('${player.name} ${player.lastname}'),
-              value: isSelected,
-              onChanged: (bool? value) {
-                setState(() {
-                  if (value == true) {
-                    _selectedPlayers.add(
-                      ConvokedUser(
-                        userId: player.email ?? '',
-                        name: '${player.name} ${player.lastname}',
-                        role: 'player',
-                      ),
-                    );
-                  } else {
-                    _selectedPlayers.removeWhere(
-                      (p) => p.userId == player.email,
-                    );
-                  }
-                });
-              },
-            );
-          }),
-        ],
-        if (delegates.isNotEmpty) ...[
-          const SizedBox(height: 16),
-          const Text(
-            'Delegats',
-            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-          ),
-          ...delegates.map((delegate) {
-            final isSelected = _selectedDelegates.any(
-              (d) => d.userId == delegate.email,
-            );
-            return CheckboxListTile(
-              title: Text('${delegate.name} ${delegate.lastname}'),
-              value: isSelected,
-              onChanged: (bool? value) {
-                setState(() {
-                  if (value == true) {
-                    _selectedDelegates.add(
-                      ConvokedUser(
-                        userId: delegate.email ?? '',
-                        name: '${delegate.name} ${delegate.lastname}',
-                        role: 'delegate',
-                      ),
-                    );
-                  } else {
-                    _selectedDelegates.removeWhere(
-                      (d) => d.userId == delegate.email,
-                    );
-                  }
-                });
-              },
-            );
-          }),
-        ],
-      ],
+        if (adultPlayers.isEmpty && childPlayers.isEmpty && delegates.isEmpty) {
+          return const Text(
+            'Aquest equip no té jugadors ni delegats assignats.',
+          );
+        }
+
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (adultPlayers.isNotEmpty || childPlayers.isNotEmpty) ...[
+              const Text(
+                'Jugadors',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              // Adult Players (UserModels)
+              ...adultPlayers.map((player) {
+                final isSelected = _selectedPlayers.any(
+                  (p) => p.userId == (player.email ?? ''),
+                );
+                return CheckboxListTile(
+                  title: Text('${player.name} ${player.lastname}'),
+                  value: isSelected,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        _selectedPlayers.add(
+                          ConvokedUser(
+                            userId: player.email ?? '',
+                            name: '${player.name} ${player.lastname}',
+                            role: 'player',
+                          ),
+                        );
+                      } else {
+                        _selectedPlayers.removeWhere(
+                          (p) => p.userId == (player.email ?? ''),
+                        );
+                      }
+                    });
+                  },
+                );
+              }),
+              // Child Players (PlayerModels)
+              ...childPlayers.map((player) {
+                final isSelected = _selectedPlayers.any(
+                  (p) => p.userId == player.id,
+                );
+                return CheckboxListTile(
+                  title: Text(player.name ?? 'Sense nom'),
+                  subtitle: Text(player.category ?? ''),
+                  secondary: const Icon(Icons.child_care, size: 20),
+                  value: isSelected,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        _selectedPlayers.add(
+                          ConvokedUser(
+                            userId: player.id ?? '',
+                            name: player.name ?? 'Sense nom',
+                            role: 'player',
+                          ),
+                        );
+                      } else {
+                        _selectedPlayers.removeWhere(
+                          (p) => p.userId == player.id,
+                        );
+                      }
+                    });
+                  },
+                );
+              }),
+            ],
+            if (delegates.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              const Text(
+                'Delegats',
+                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              ...delegates.map((delegate) {
+                final isSelected = _selectedDelegates.any(
+                  (d) => d.userId == (delegate.email ?? ''),
+                );
+                return CheckboxListTile(
+                  title: Text('${delegate.name} ${delegate.lastname}'),
+                  value: isSelected,
+                  onChanged: (bool? value) {
+                    setState(() {
+                      if (value == true) {
+                        _selectedDelegates.add(
+                          ConvokedUser(
+                            userId: delegate.email ?? '',
+                            name: '${delegate.name} ${delegate.lastname}',
+                            role: 'delegate',
+                          ),
+                        );
+                      } else {
+                        _selectedDelegates.removeWhere(
+                          (d) => d.userId == (delegate.email ?? ''),
+                        );
+                      }
+                    });
+                  },
+                );
+              }),
+            ],
+          ],
+        );
+      },
     );
   }
 
@@ -371,6 +414,8 @@ class _CreateConvocatoriaPageState extends State<CreateConvocatoriaPage> {
       _endTime.minute,
     );
 
+    final userProvider = Provider.of<UserProvider>(context, listen: false);
+
     final event = Event(
       id: const Uuid().v4(), // Temporary ID, will be replaced by Firestore ID
       title: _titleController.text,
@@ -379,6 +424,7 @@ class _CreateConvocatoriaPageState extends State<CreateConvocatoriaPage> {
       location: _locationController.text,
       confirmedUsers: [], // Will be populated as users confirm
       description: 'Convocatòria per ${_selectedTeam!.name}',
+      creatorUid: userProvider.firebaseUser?.uid ?? '',
     );
 
     try {
@@ -389,6 +435,8 @@ class _CreateConvocatoriaPageState extends State<CreateConvocatoriaPage> {
         teamId: _selectedTeamId!,
         teamName: _selectedTeam!.name ?? 'Equip',
         event: event,
+        eventTitle: event.title,
+        eventStartTime: Timestamp.fromDate(event.startTime),
         players: _selectedPlayers,
         delegates: _selectedDelegates,
       );

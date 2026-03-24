@@ -41,14 +41,16 @@ service cloud.firestore {
     } // Fin /users/{userId}
 
     match /teams/{teamId} {
+      allow get, list: if request.auth != null;
+      allow create, update, delete: if request.auth != null;
+    }
+ // Fin /teams/{teamId}
 
-      allow get: if request.auth != null;
-      allow list: if request.auth != null;
-      allow create: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-      allow update: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-      allow delete: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-
-    } // Fin /teams/{teamId}
+    match /players/{playerId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null;
+      allow update, delete: if request.auth != null && (request.auth.uid in resource.data.parent_ids);
+    }
 
     match /events/{eventId} {
 
@@ -63,12 +65,8 @@ service cloud.firestore {
     }
 
     match /products/{productId} {
-
       allow get, list: if request.auth != null;
-      allow create: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-      allow update: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-      allow delete: if false; // TODO: AJUSTAR SEGÚN TUS NECESIDADES
-
+      allow create, update, delete: if request.auth != null;
     }
   } // Fin /databases/{database}/documents
 } // Fin service cloud.firestore

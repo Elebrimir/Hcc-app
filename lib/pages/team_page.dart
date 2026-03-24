@@ -7,12 +7,22 @@ import 'package:hcc_app/models/team_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:hcc_app/utils/responsive_container.dart';
 import 'package:hcc_app/widgets/team_data_wrapper.dart';
+import 'package:hcc_app/providers/user_provider.dart';
+import 'package:hcc_app/widgets/team_form_modal.dart';
+import 'package:provider/provider.dart';
 
 class TeamPage extends StatelessWidget {
   const TeamPage({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final userProvider = Provider.of<UserProvider>(context);
+    final userModel = userProvider.userModel;
+    final bool canAddTeam =
+        userModel?.role == 'Admin' ||
+        userModel?.role == 'Coach' ||
+        userModel?.role == 'Delegate';
+
     final Stream<QuerySnapshot<TeamModel>> teamStream =
         FirebaseFirestore.instance
             .collection('teams')
@@ -29,7 +39,21 @@ class TeamPage extends StatelessWidget {
         elevation: 0,
       ),
       backgroundColor: Colors.grey[300],
-
+      floatingActionButton:
+          canAddTeam
+              ? FloatingActionButton(
+                onPressed: () {
+                  showModalBottomSheet(
+                    context: context,
+                    isScrollControlled: true,
+                    backgroundColor: Colors.transparent,
+                    builder: (context) => const TeamFormModal(),
+                  );
+                },
+                backgroundColor: Colors.red[900],
+                child: const Icon(Icons.add, color: Colors.white),
+              )
+              : null,
       body: TeamDataWrapper(
         builder: (context, teams) {
           if (teams.isEmpty) {

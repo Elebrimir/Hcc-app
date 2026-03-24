@@ -24,8 +24,12 @@ class TestDocumentSnapshot {
 class MockDocumentSnapshot extends Mock
     implements DocumentSnapshot<Map<String, dynamic>> {
   final Map<String, dynamic> _data;
+  final String _id;
 
-  MockDocumentSnapshot(this._data);
+  MockDocumentSnapshot(this._data, {String id = 'test_id'}) : _id = id;
+
+  @override
+  String get id => _id;
 
   @override
   Map<String, dynamic>? data() => _data;

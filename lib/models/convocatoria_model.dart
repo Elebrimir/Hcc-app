@@ -56,6 +56,8 @@ class ConvocatoriaModel {
   final String teamId;
   final String teamName;
   final String eventId;
+  final String? eventTitle;
+  final Timestamp? eventStartTime;
   final List<ConvokedUser> players;
   final List<ConvokedUser> delegates;
   final Timestamp createdAt;
@@ -65,6 +67,8 @@ class ConvocatoriaModel {
     required this.teamId,
     required this.teamName,
     required this.eventId,
+    this.eventTitle,
+    this.eventStartTime,
     required this.players,
     required this.delegates,
     required this.createdAt,
@@ -75,6 +79,8 @@ class ConvocatoriaModel {
       'teamId': teamId,
       'teamName': teamName,
       'eventId': eventId,
+      'eventTitle': eventTitle,
+      'eventStartTime': eventStartTime,
       'players': players.map((e) => e.toMap()).toList(),
       'delegates': delegates.map((e) => e.toMap()).toList(),
       'createdAt': createdAt,
@@ -90,6 +96,8 @@ class ConvocatoriaModel {
       teamId: data['teamId'],
       teamName: data['teamName'] ?? '',
       eventId: data['eventId'],
+      eventTitle: data['eventTitle'],
+      eventStartTime: data['eventStartTime'] as Timestamp?,
       players:
           (data['players'] as List<dynamic>?)
               ?.map((e) => ConvokedUser.fromMap(e as Map<String, dynamic>))
