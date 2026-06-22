@@ -27,7 +27,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.event_name == 'push' || github.event.inputs.build == 'android'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
 
       - uses: dart-lang/setup-dart@65eb853c7ba17dde3be364c3d2858773e7144260
 
