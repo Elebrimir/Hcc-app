@@ -33,7 +33,7 @@ dependencies:
   flutter_localizations:
     sdk: flutter
   intl: ^0.20.2
-  firebase_core: ^4.4.0
+  firebase_core: ^4.11.0
   cloud_firestore: ^6.3.0
   firebase_auth: ^6.4.0
   mockito: ^5.7.0
